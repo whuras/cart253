@@ -6,9 +6,9 @@ Brief:
 x Include three shapes
 - Include movement
 - Include size changes
-- Include color changes
+x Include color changes
 - Use map() and constrain()
-- Respond to the mouse position using mouseX and mouseY
+x Respond to the mouse position using mouseX and mouseY
 
 Evaluation:
 - Runs and meets the brief
@@ -26,6 +26,14 @@ let canvas = {
   height: 450,
   positionType: 'fixed'
 };
+
+// Background / Sky
+let bgRainColor = '#eef1ef';
+let bgSunColor = '#fff4d6';
+let bgColor;
+let sunnyHeight = 100;
+let lerpAmt = 0;
+let lerpSpeed = 0.001;
 
 // Clouds
 let frontCloudColor = "#a9b4c2"
@@ -47,6 +55,7 @@ function setup() {
   createCanvas(canvas.width, canvas.height).position(windowWidth / 2 - canvas.width / 2, windowHeight/2 - canvas.height / 2,'fixed');
   ellipseMode(CENTER);
   rectMode(CENTER);
+  bgColor = bgRainColor;
 }
 
 
@@ -54,6 +63,22 @@ function setup() {
 Description of draw()
 */
 function draw() {
+
+  if(mouseY < sunnyHeight){
+
+    lerpAmt += lerpSpeed;
+    lerpAmt = constrain(lerpAmt, 0, 1);
+
+    bgColor = lerpColor(color(bgColor), color(bgSunColor), lerpAmt);
+
+  }else{
+    lerpAmt -= lerpSpeed;
+    lerpAmt = constrain(lerpAmt, 0, 1);
+
+    bgColor = lerpColor(color(bgColor), color(bgRainColor), lerpAmt);
+  }
+
+  background(bgColor);
 
   // back cloud
   fill(bgCloudColor);
