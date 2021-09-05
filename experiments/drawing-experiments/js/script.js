@@ -13,10 +13,10 @@ let n = 1000;
 let a = 255 / n;
 
 let circleObj = {
-  xPos: 0,
+  xPos: 200,
   yPos: 250,
   size: 200,
-  speed: 2
+  speed: 5
 };
 
 // setup()
@@ -48,6 +48,12 @@ function setup() {
 // Description of draw() goes here.
 function draw() {
   background(bgColor);
+
+  if(circleObj.xPos > windowWidth - circleObj.size / 2 || circleObj.xPos < 0 + circleObj.size / 2){
+    circleObj.speed *= -1;
+  }
+
   circleObj.xPos += circleObj.speed;
   ellipse(circleObj.xPos, circleObj.yPos, circleObj.size);
+
 }
