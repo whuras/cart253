@@ -21,6 +21,13 @@ let covid19 = {
   }
 };
 
+let user = {
+  x: 250,
+  y: 250,
+  size: 100,
+  fill: 255
+};
+
 /**
 Description of preload
 */
@@ -56,5 +63,11 @@ function draw() {
     covid19.x = 0;
     covid19.y = random(0, height);
   }
-  
+
+  user.x = mouseX;
+  user.y = mouseY;
+
+  fill(user.fill);
+  ellipse(user.x, user.y, user.size);
+
 }
