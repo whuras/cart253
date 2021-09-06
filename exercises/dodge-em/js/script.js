@@ -29,13 +29,15 @@ let coal = {
   vx: 0,
   vy: 0,
   speed: 5,
-  image: undefined
+  image: undefined,
+  angle: 0
 };
 
-let user = {
+let snowman = {
   x: 250,
   y: 250,
   size: 100,
+  image: undefined,
   imageHappy: undefined,
   imageNormal: undefined
 };
@@ -44,8 +46,10 @@ let user = {
 Description of preload
 */
 function preload() {
-  user.imageHappy = loadImage("assets/images/snowman_happy.png");
-  user.imageNormal = loadImage("assets/images/snowman_normal.png");
+  snowman.imageHappy = loadImage("assets/images/snowman_happy.png");
+  snowman.imageNormal = loadImage("assets/images/snowman_normal.png");
+  snowman.image = snowman.imageNormal;
+
   coal.image = loadImage("assets/images/coal.png");
 }
 
@@ -59,7 +63,7 @@ function setup() {
   coal.y = random(0, height);
   coal.vx = coal.speed;
 
-  noCursor();
+  //noCursor();
   imageMode(CENTER);
 }
 
@@ -81,22 +85,37 @@ function draw() {
     coal.y = random(0, height);
   }
 
-  // User movement
-  user.x = mouseX;
-  user.y = mouseY;
-
   // Check for hit by coal
-  let d = dist(user.x, user.y,  coal.x, coal.y);
-  if(d <= coal.size/2 + user.size/2){
+  let d = dist(snowman.x, snowman.y,  coal.x, coal.y);
+  if(d <= coal.size/2 + snowman.size/2){
     noLoop();
   }
 
   // Coal Display
-  image(coal.image, coal.x, coal.y, coal.size, coal.size);
+  push();
+  translate(coal.x, coal.y);
+  rotate(coal.angle);
+  coal.angle += 0.05;
+  image(coal.image, 0, 0, coal.size, coal.size);
+  pop();
 
-  // User Display
-  image(user.imageNormal, user.x, user.y);
+  // Snowman Display
+  if(dist(mouseX, mouseY, snowman.x, snowman.y) < snowman.size / 2){
+    snowman.image = snowman.imageHappy;
+  }else{
+    snowman.image = snowman.imageNormal;
+  }
+  image(snowman.image, snowman.x, snowman.y, snowman.size, snowman.size);
 
+}
+
+function mouseDragged(){
+  // Change snowman position if being dragged by mouse
+  if(dist(mouseX, mouseY, snowman.x, snowman.y) < snowman.size / 2){
+    // Snowman movement
+    snowman.x = mouseX;
+    snowman.y = mouseY;
+  }
 }
 
 function createHills(){
@@ -120,6 +139,5 @@ function createHills(){
         150 + j * offset);
     }
   }
-
   pop();
 }
