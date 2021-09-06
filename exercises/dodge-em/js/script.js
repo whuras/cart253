@@ -19,32 +19,34 @@ Evaluation:
 
 "use strict";
 
-let covid19 = {
+let groundColor = "#abd3d2";
+let snowColor = "#bcdddb";
+
+let coal = {
   x: 0,
   y: 250,
-  size: 100,
+  size: 50,
   vx: 0,
   vy: 0,
   speed: 5,
-  fill: {
-    r: 255,
-    g: 0,
-    b: 0
-  }
+  image: undefined
 };
 
 let user = {
   x: 250,
   y: 250,
   size: 100,
-  fill: 255
+  imageHappy: undefined,
+  imageNormal: undefined
 };
 
 /**
 Description of preload
 */
 function preload() {
-
+  user.imageHappy = loadImage("assets/images/snowman_happy.png");
+  user.imageNormal = loadImage("assets/images/snowman_normal.png");
+  coal.image = loadImage("assets/images/coal.png");
 }
 
 
@@ -54,10 +56,11 @@ Description of setup
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  covid19.y = random(0, height);
-  covid19.vx = covid19.speed;
+  coal.y = random(0, height);
+  coal.vx = coal.speed;
 
   noCursor();
+  imageMode(CENTER);
 }
 
 
@@ -66,43 +69,57 @@ Description of draw()
 */
 function draw() {
   // Background display
-  background(0);
-  for(let i = 0; i < 100; i++){
-    let x = random(0, width);
-    let y = random(0, height);
+  background(color(groundColor));
+  createHills();
 
-    push();
-    stroke(255);
-    point(x, y);
-    pop();
-  }
+  // Coal movement
+  coal.x += coal.vx;
+  coal.y += coal.vy;
 
-
-  // Covid19 Circle movement
-  covid19.x += covid19.vx;
-  covid19.y += covid19.vy;
-
-  if(covid19.x > width){
-    covid19.x = 0;
-    covid19.y = random(0, height);
+  if(coal.x > width){
+    coal.x = 0;
+    coal.y = random(0, height);
   }
 
   // User movement
   user.x = mouseX;
   user.y = mouseY;
 
-  // Check for catching covid19
-  let d = dist(user.x, user.y,  covid19.x, covid19.y);
-  if(d <= covid19.size/2 + user.size/2){
+  // Check for hit by coal
+  let d = dist(user.x, user.y,  coal.x, coal.y);
+  if(d <= coal.size/2 + user.size/2){
     noLoop();
   }
 
-  // Covid19 Display
-  fill(covid19.fill.r, covid19.fill.g, covid19.fill.b);
-  ellipse(covid19.x, covid19.y, covid19.size);
+  // Coal Display
+  image(coal.image, coal.x, coal.y, coal.size, coal.size);
 
   // User Display
-  fill(user.fill);
-  ellipse(user.x, user.y, user.size);
+  image(user.imageNormal, user.x, user.y);
 
+}
+
+function createHills(){
+  push();
+  noFill();
+  stroke(color(snowColor));
+  strokeWeight(10);
+
+  let offset = 100;
+
+  for(let i =  0; i * offset < width; i++){
+    for(let j = 0; j * offset < height; j++){
+      bezier(
+        i * offset,
+        j * offset,
+        i * offset,
+        100 + j * offset,
+        300 + i * offset,
+        100 + j * offset,
+        400 + i * offset,
+        150 + j * offset);
+    }
+  }
+
+  pop();
 }
