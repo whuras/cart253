@@ -21,6 +21,8 @@ Evaluation:
 
 let groundColor = "#abd3d2";
 let snowColor = "#bcdddb";
+let imageGameOver;
+let canReset = false;
 
 let coal = {
   x: 0,
@@ -46,6 +48,7 @@ let snowman = {
 Description of preload
 */
 function preload() {
+  imageGameOver = loadImage("assets/images/gameOver.png");
   snowman.imageHappy = loadImage("assets/images/snowman_happy.png");
   snowman.imageNormal = loadImage("assets/images/snowman_normal.png");
   snowman.image = snowman.imageNormal;
@@ -89,6 +92,9 @@ function draw() {
   let d = dist(snowman.x, snowman.y,  coal.x, coal.y);
   if(d <= coal.size/2 + snowman.size/2){
     noLoop();
+    background(0, 0, 0, 100);
+    image(imageGameOver, width/2, height/2);
+    canReset = true;
   }
 
   // Coal Display
@@ -106,7 +112,6 @@ function draw() {
     snowman.image = snowman.imageNormal;
   }
   image(snowman.image, snowman.x, snowman.y, snowman.size, snowman.size);
-
 }
 
 function mouseDragged(){
@@ -115,6 +120,16 @@ function mouseDragged(){
     // Snowman movement
     snowman.x = mouseX;
     snowman.y = mouseY;
+  }
+}
+
+function mousePressed(){
+  if(canReset){
+    canReset = false;
+    coal.y = random(0, height);
+    coal.x = 0;
+    coal.vx = coal.speed;
+    loop();
   }
 }
 
