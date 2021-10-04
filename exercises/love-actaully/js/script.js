@@ -25,15 +25,16 @@ let timer = 5;
 
 let state = undefined;
 const states = {
+  OPENING: "opening",
   START: "start",
-  SIM: "sim",
-  SEND: "END"
+  END: "END"
 }
-
-let heartSize = 200;
 
 let player;
 let npc;
+
+let hearts = [];
+let heartSize = 200;
 
 /**
 Description of preload
@@ -50,10 +51,17 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   bgColor = startBGColor;
-  state = states.START;
+  state = states.OPENING;
 
   player = new Character(100, 100, 10);
   npc = new Character(200, 200, 20);
+
+  for(let i = 0; i < width; i += heartSize){
+    hearts[i] = [];
+    for(let j = 0; j < height; j += heartSize){
+      hearts[i][j] = new Heart(i + heartSize/2, j + heartSize/2, heartSize/2);
+    }
+  }
 
   textSize(64);
   fill(255);
@@ -66,25 +74,31 @@ Description of draw()
 function draw() {
   background(bgColor);
 
-  player.display();
-  npc.display();
-
-/*
   if(state == states.START){
     startSim();
   }
   else if(state == states.END){
     endSim();
-  }*/
+  }
 }
 
 function keyPressed(){
-  state = states.END;
+  switch(state){
+    case states.OPENING:
+      state = states.START;
+      break;
+    case states.START:
+      state = states.END;
+      break;
+    case states.END:
+      state = states.OPENING;
+      break;
+  }
 }
 
 function startSim(){
   bgColor = startBGColor;
-  //drawHearts();
+  displayObjects();
 }
 
 function endSim(){
@@ -98,27 +112,55 @@ function endSim(){
     timer = 0;
     state = states.START;
   }
-
 }
 
-// heart credit: https://editor.p5js.org/Mithru/sketches/Hk1N1mMQg
-function drawHearts(){
-  for(let i = 0; i < width; i+= heartSize){
-    for(let j = 0; j < height; j+=heartSize){
-      fill(255,128,255);
-      heartShape(i + heartSize/2, j + heartSize/2, heartSize/2);
+function displayObjects(){
+  for(let i = 0; i < width; i += heartSize){
+    for(let j = 0; j < height; j += heartSize){
+      hearts[i][j].display();
     }
+  }
+
+  player.display();
+  npc.display();
+}
+
+// Heart Class
+class Heart{
+  constructor(x, y, size){
+    this.x = x;
+    this.y = y;
+    this.size = size;
+
+    this.r = 255;
+    this.g = 128;
+    this.b = 255;
+    this.a = 255;
+  }
+
+  color(r, g, b, a){
+    this.r = r;
+    this.g = g;
+    this.b = b;
+    this.a = a;
+  }
+
+  display(){
+    push();
+    fill(this.r, this.g, this.b, this.a);
+
+    // heart credit: https://editor.p5js.org/Mithru/sketches/Hk1N1mMQg
+    beginShape();
+    vertex(this.x, this.y);
+    bezierVertex(this.x - this.size / 2, this.y - this.size / 2, this.x - this.size, this.y + this.size / 3, this.x, this.y + this.size);
+    bezierVertex(this.x + this.size, this.y + this.size / 3, this.x + this.size / 2, this.y - this.size / 2, this.x, this.y);
+    endShape(CLOSE);
+
+    pop();
   }
 }
 
-function heartShape(x, y, size) {
-  beginShape();
-  vertex(x, y);
-  bezierVertex(x - size / 2, y - size / 2, x - size, y + size / 3, x, y + size);
-  bezierVertex(x + size, y + size / 3, x + size / 2, y - size / 2, x, y);
-  endShape(CLOSE);
-}
-
+// Character Class
 class Character{
   constructor(x, y, d){
     this.x = x;
