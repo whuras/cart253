@@ -30,6 +30,8 @@ const states = {
   SEND: "END"
 }
 
+let heartSize = 200;
+
 /**
 Description of preload
 */
@@ -72,7 +74,7 @@ function keyPressed(){
 
 function startSim(){
   bgColor = startBGColor;
-  text("game started", width/2, height/2);
+  drawHearts();
 }
 
 function endSim(){
@@ -87,4 +89,23 @@ function endSim(){
     timer = 0;
     state = states.START;
   }
+
+}
+
+// heart credit: https://editor.p5js.org/Mithru/sketches/Hk1N1mMQg
+function drawHearts(){
+  for(let i = 0; i < width; i+= heartSize){
+    for(let j = 0; j < height; j+=heartSize){
+      fill(255,128,255);
+      heartShape(i + heartSize/2, j + heartSize/2, heartSize/2);
+    }
+  }
+}
+
+function heartShape(x, y, size) {
+  beginShape();
+  vertex(x, y);
+  bezierVertex(x - size / 2, y - size / 2, x - size, y + size / 3, x, y + size);
+  bezierVertex(x + size, y + size / 3, x + size / 2, y - size / 2, x, y);
+  endShape(CLOSE);
 }
