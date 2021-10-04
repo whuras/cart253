@@ -32,6 +32,9 @@ const states = {
 
 let heartSize = 200;
 
+let player;
+let npc;
+
 /**
 Description of preload
 */
@@ -49,6 +52,9 @@ function setup() {
   bgColor = startBGColor;
   state = states.START;
 
+  player = new Character(100, 100, 10);
+  npc = new Character(200, 200, 20);
+
   textSize(64);
   fill(255);
 }
@@ -60,12 +66,16 @@ Description of draw()
 function draw() {
   background(bgColor);
 
+  player.display();
+  npc.display();
+
+/*
   if(state == states.START){
     startSim();
   }
   else if(state == states.END){
     endSim();
-  }
+  }*/
 }
 
 function keyPressed(){
@@ -74,12 +84,11 @@ function keyPressed(){
 
 function startSim(){
   bgColor = startBGColor;
-  drawHearts();
+  //drawHearts();
 }
 
 function endSim(){
   bgColor = endBGColor;
-  text("game over", width/2, height/2);
 
   // timer credit: https://editor.p5js.org/marynotari/sketches/S1T2ZTMp-
   if(frameCount % 60 == 0 && timer > 0){
@@ -108,4 +117,31 @@ function heartShape(x, y, size) {
   bezierVertex(x - size / 2, y - size / 2, x - size, y + size / 3, x, y + size);
   bezierVertex(x + size, y + size / 3, x + size / 2, y - size / 2, x, y);
   endShape(CLOSE);
+}
+
+class Character{
+  constructor(x, y, d){
+    this.x = x;
+    this.y = y;
+    this.diameter = d;
+
+    this.r = 0;
+    this.g = 0;
+    this.b = 0;
+    this.a = 255;
+  }
+
+  color(r, g, b, a){
+    this.r = r;
+    this.g = g;
+    this.b = b;
+    this.a = a;
+  }
+
+  display(){
+    push();
+    fill(this.r, this.g, this.b, this.a);
+    ellipse(this.x, this.y, this.diameter, this.diameter)
+    pop();
+  }
 }
