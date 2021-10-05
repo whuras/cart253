@@ -6,25 +6,24 @@ Brief:
 x Allow the user to control one of the circles
 x Make the non-user circle move differently
 x Add at least one extra function
-- Add at least one extra ending
+x- Add at least one extra ending
 
 Evaluation:
-- Functional: The program runs and meets the brief in terms of functionality and code requirements, shows mastery of the course material
-- Stylish: Code follows the relevant parts of the style guide
-- Committed: Commits and messages follow the style guide
-- Creative: The program is an interesting and expressive experience for the user
+x Functional: The program runs and meets the brief in terms of functionality and code requirements, shows mastery of the course material
+x Stylish: Code follows the relevant parts of the style guide
+x Committed: Commits and messages follow the style guide
+x Creative: The program is an interesting and expressive experience for the user
 **************************************************/
 
 "use strict";
 
-let bgColor = undefined;
-let startBGColor = 'rgba(224,255,236,255)';
-let endBGColor = 'rgba(255,128,255,255)';
-let npcColors = ['rgba(104, 143, 232, 255)', 'rgba(232, 157, 104, 255)', 'rgba(255, 128, 255, 255)', 'rgba(255, 248, 115, 255)'];
-
 let timer = 5;
 
-let state = undefined;
+let bgColor;
+let startBGColor = 'rgba(224,255,236,255)';
+let endBGColor = 'rgba(255,128,255,255)';
+
+let state;
 const states = {
   OPENING: "opening",
   START: "start",
@@ -34,8 +33,11 @@ const states = {
 }
 
 let player;
+let playerSize = 10;
 let npcFake;
 let npcReal;
+let npcSize = 20;
+let realNPCSpeed = 0.5;
 let randDirection = [-1, 1];
 
 let hearts = [];
@@ -50,7 +52,7 @@ function preload() {
 
 
 /**
-Description of setup
+Scene setup.
 */
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -67,7 +69,7 @@ function setup() {
 
 
 /**
-Description of draw()
+Controls the progression of the simulation.
 */
 function draw() {
   background(bgColor);
@@ -89,31 +91,51 @@ function draw() {
   }
 }
 
+
+/**
+Allows changing of states with a keypress
+*/
 function keyPressed(){
-  if(state == states.OPENING){
+  if(state == states.OPENING || state == states.END || state == states.ENDREAL){
     state = states.START;
   }
 }
 
+
+/**
+Displays the instructions for the simulation
+*/
 function openingSim(){
   push();
   textSize(32);
   fill(0, 0, 0, 255);
-  text("Press any button and try to meet the love of your life!", width/2, height/2);
+  text("Press any button and move your mouse to try and meet the love of your life!", width/2, height/2);
   pop();
 }
 
+
+/**
+Starts simulation by constructing objects
+*/
 function startSim(){
+  bgColor = startBGColor;
   setupObjects();
   state = states.INPROGRESS;
 }
 
+
+/**
+Main simulation displays objects
+*/
 function sim(){
-  bgColor = startBGColor;
   displayObjects();
   overlapCheck();
 }
 
+
+/**
+End sumulation with countdown to auto restart
+*/
 function endSim(){
   bgColor = endBGColor;
 
@@ -129,6 +151,10 @@ function endSim(){
   text("Oh no! This isn't the love of your life!\nTry again in " + timer, width/2, height/2);
 }
 
+
+/**
+End real simulation with countdown to auto restart
+*/
 function endSimReal(){
   bgColor = endBGColor;
 
@@ -144,6 +170,10 @@ function endSimReal(){
   text("Congratulations!\nYou found the love of your life!\nBut try to find someone better in " + timer, width/2, height/2);
 }
 
+
+/**
+Checks for overlaps between the player and the npcs
+*/
 function overlapCheck(){
   let d1 = dist(player.x, player.y, npcFake.x, npcFake.y);
   if(d1 <= (player.diameter / 2) + (npcFake.diameter / 2)){
@@ -156,17 +186,22 @@ function overlapCheck(){
   }
 }
 
+
+/**
+Creates player, npc, and heart objects and sets baseline parameters
+*/
 function setupObjects(){
-  player = new Character(100, 100, 10);
+  player = new Character(mouseX, mouseY, playerSize);
+  player.color(235, 66, 56, 255);
 
-  npcFake = new Character(200, 200, 20);
+  npcFake = new Character(random(1, width), random(1, height), npcSize);
   npcFake.setRandomVelocity();
-  npcFake.color(random(npcColors));
+  npcFake.color(104, 143, 232, 255);
 
-  npcReal = new Character(200, 200, 20);
+  npcReal = new Character(random(1, width), random(1, height), npcSize);
   npcReal.setRandomVelocity();
-  npcReal.color(0, 0, 0, 255);
-  npcReal.speed = 0.5;
+  npcReal.color(255, 255, 255, 128);
+  npcReal.speed = realNPCSpeed;
 
   for(let i = 0; i < width + heartSize; i += heartSize){
     hearts[i] = [];
@@ -176,8 +211,15 @@ function setupObjects(){
   }
 }
 
-function displayObjects(){
 
+/**
+Displays player, npc, and heart visuals
+*/
+function displayObjects(){
+  player.move(mouseX, mouseY);
+  player.display();
+  displayNPC(npcFake);
+  displayNPC(npcReal);
 
   for(let i = 0; i < width + heartSize; i += heartSize){
     for(let j = 0; j < height + heartSize; j += heartSize){
@@ -190,13 +232,12 @@ function displayObjects(){
       hearts[i][j].display();
     }
   }
-
-  player.move(mouseX, mouseY);
-  player.display();
-  displayNPC(npcFake);
-  displayNPC(npcReal);
 }
 
+
+/**
+Displays npc visuals
+*/
 function displayNPC(npc){
   while(npc.x + npc.vx <= 0 || npc.x + npc.vx >= width || npc.y + npc.vy <= 0 || npc.y + npc.vy >= height){
     npc.setRandomVelocity();
@@ -205,7 +246,10 @@ function displayNPC(npc){
   npc.display();
 }
 
-// Heart Class
+
+/**
+Heart class manages position, size, and display of background heart objects
+*/
 class Heart{
   constructor(x, y, size){
     this.x = x;
@@ -244,7 +288,10 @@ class Heart{
   }
 }
 
-// Character Class
+
+/**
+Character class manages the position, size, and display of the player and npcs
+*/
 class Character{
   constructor(x, y, diameter){
     this.x = x;
