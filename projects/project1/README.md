@@ -1,3 +1,7 @@
-# Template p5 project
+# CART253 - Creative Computation I, Project 1: Simulation!
+## Wayne Huras, ID 40074423
 
-This is the README file for the entire project. For more official projects you should write information here about the nature of the project, your name, any special explanations of how the project works, etc.
+Instructions:
+
+
+Credits:
