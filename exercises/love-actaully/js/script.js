@@ -3,9 +3,9 @@ Exercise: Love, actually!
 Wayne Huras ID 40074423
 
 Brief:
-- Allow the user to control one of the circles
-- Make the non-user circle move differently
-- Add at least one extra function
+x Allow the user to control one of the circles
+x Make the non-user circle move differently
+x Add at least one extra function
 - Add at least one extra ending
 
 Evaluation:
@@ -20,6 +20,7 @@ Evaluation:
 let bgColor = undefined;
 let startBGColor = 'rgba(224,255,236,255)';
 let endBGColor = 'rgba(255,128,255,255)';
+let npcColors = ['rgba(104, 143, 232, 255)', 'rgba(232, 157, 104, 255)', 'rgba(255, 128, 255, 255)', 'rgba(255, 248, 115, 255)'];
 
 let timer = 5;
 
@@ -28,11 +29,13 @@ const states = {
   OPENING: "opening",
   START: "start",
   INPROGRESS: "inprogress",
-  END: "end"
+  END: "end",
+  ENDREAL: "endReal"
 }
 
 let player;
-let npc;
+let npcFake;
+let npcReal;
 let randDirection = [-1, 1];
 
 let hearts = [];
@@ -55,7 +58,9 @@ function setup() {
   bgColor = startBGColor;
   state = states.OPENING;
 
+  textAlign(CENTER, CENTER);
   noCursor();
+  noStroke();
   textSize(64);
   fill(255);
 }
@@ -67,7 +72,10 @@ Description of draw()
 function draw() {
   background(bgColor);
 
-  if(state == states.START){
+  if(state == states.OPENING){
+    openingSim();
+  }
+  else if(state == states.START){
     startSim();
   }
   else if(state == states.INPROGRESS){
@@ -76,17 +84,23 @@ function draw() {
   else if(state == states.END){
     endSim();
   }
+  else if(state == states.ENDREAL){
+    endSimReal();
+  }
 }
 
 function keyPressed(){
-  switch(state){
-    case states.OPENING:
-      state = states.START;
-      break;
-    case states.END:
-      state = states.OPENING;
-      break;
+  if(state == states.OPENING){
+    state = states.START;
   }
+}
+
+function openingSim(){
+  push();
+  textSize(32);
+  fill(0, 0, 0, 255);
+  text("Press any button and try to meet the love of your life!", width/2, height/2);
+  pop();
 }
 
 function startSim(){
@@ -97,6 +111,7 @@ function startSim(){
 function sim(){
   bgColor = startBGColor;
   displayObjects();
+  overlapCheck();
 }
 
 function endSim(){
@@ -107,15 +122,51 @@ function endSim(){
     timer --;
   }
   if(timer <= 0){
-    timer = 0;
+    timer = 5;
     state = states.START;
+  }
+
+  text("Oh no! This isn't the love of your life!\nTry again in " + timer, width/2, height/2);
+}
+
+function endSimReal(){
+  bgColor = endBGColor;
+
+  // timer credit: https://editor.p5js.org/marynotari/sketches/S1T2ZTMp-
+  if(frameCount % 60 == 0 && timer > 0){
+    timer --;
+  }
+  if(timer <= 0){
+    timer = 5;
+    state = states.START;
+  }
+
+  text("Congratulations!\nYou found the love of your life!\nBut try to find someone better in " + timer, width/2, height/2);
+}
+
+function overlapCheck(){
+  let d1 = dist(player.x, player.y, npcFake.x, npcFake.y);
+  if(d1 <= (player.diameter / 2) + (npcFake.diameter / 2)){
+    state = states.END;
+  }
+
+  let d2 = dist(player.x, player.y, npcReal.x, npcReal.y);
+  if(d2 <= (player.diameter / 2) + (npcFake.diameter / 2)){
+    state = states.ENDREAL;
   }
 }
 
 function setupObjects(){
   player = new Character(100, 100, 10);
-  npc = new Character(200, 200, 20);
-  npc.setRandomVelocity();
+
+  npcFake = new Character(200, 200, 20);
+  npcFake.setRandomVelocity();
+  npcFake.color(random(npcColors));
+
+  npcReal = new Character(200, 200, 20);
+  npcReal.setRandomVelocity();
+  npcReal.color(0, 0, 0, 255);
+  npcReal.speed = 0.5;
 
   for(let i = 0; i < width + heartSize; i += heartSize){
     hearts[i] = [];
@@ -126,18 +177,11 @@ function setupObjects(){
 }
 
 function displayObjects(){
-  player.move(mouseX, mouseY);
-  player.display();
 
-  while(npc.x + npc.vx <= 0 || npc.x + npc.vx >= width || npc.y + npc.vy <= 0 || npc.y + npc.vy >= height){
-    npc.setRandomVelocity();
-  }
-  npc.move(npc.x + npc.vx, npc.y + npc.vy);
-  npc.display();
 
   for(let i = 0; i < width + heartSize; i += heartSize){
     for(let j = 0; j < height + heartSize; j += heartSize){
-      let a = dist(player.x, player.y, npc.x, npc.y);
+      let a = dist(player.x, player.y, npcFake.x, npcFake.y);
       let amap1 = 255 - map(a, 0, width, 0, 255);
       let amap2 = map(a, 0, width, heartSize * 2, 0);
 
@@ -146,6 +190,19 @@ function displayObjects(){
       hearts[i][j].display();
     }
   }
+
+  player.move(mouseX, mouseY);
+  player.display();
+  displayNPC(npcFake);
+  displayNPC(npcReal);
+}
+
+function displayNPC(npc){
+  while(npc.x + npc.vx <= 0 || npc.x + npc.vx >= width || npc.y + npc.vy <= 0 || npc.y + npc.vy >= height){
+    npc.setRandomVelocity();
+  }
+  npc.move(npc.x + npc.vx, npc.y + npc.vy);
+  npc.display();
 }
 
 // Heart Class
@@ -175,7 +232,6 @@ class Heart{
   display(){
     push();
     fill(this.r, this.g, this.b, this.a);
-    noStroke();
 
     // heart credit: https://editor.p5js.org/Mithru/sketches/Hk1N1mMQg
     beginShape();
