@@ -18,7 +18,7 @@ Evaluation:
 "use strict";
 
 let bgColor = undefined;
-let startBGColor = 'rgba(128,128,128,255)';
+let startBGColor = 'rgba(224,255,236,255)';
 let endBGColor = 'rgba(255,128,255,255)';
 
 let timer = 5;
@@ -27,11 +27,13 @@ let state = undefined;
 const states = {
   OPENING: "opening",
   START: "start",
-  END: "END"
+  INPROGRESS: "inprogress",
+  END: "end"
 }
 
 let player;
 let npc;
+let randDirection = [-1, 1];
 
 let hearts = [];
 let heartSize = 200;
@@ -53,16 +55,7 @@ function setup() {
   bgColor = startBGColor;
   state = states.OPENING;
 
-  player = new Character(100, 100, 10);
-  npc = new Character(200, 200, 20);
-
-  for(let i = 0; i < width; i += heartSize){
-    hearts[i] = [];
-    for(let j = 0; j < height; j += heartSize){
-      hearts[i][j] = new Heart(i + heartSize/2, j + heartSize/2, heartSize/2);
-    }
-  }
-
+  noCursor();
   textSize(64);
   fill(255);
 }
@@ -77,6 +70,9 @@ function draw() {
   if(state == states.START){
     startSim();
   }
+  else if(state == states.INPROGRESS){
+    sim();
+  }
   else if(state == states.END){
     endSim();
   }
@@ -87,9 +83,6 @@ function keyPressed(){
     case states.OPENING:
       state = states.START;
       break;
-    case states.START:
-      state = states.END;
-      break;
     case states.END:
       state = states.OPENING;
       break;
@@ -97,6 +90,11 @@ function keyPressed(){
 }
 
 function startSim(){
+  setupObjects();
+  state = states.INPROGRESS;
+}
+
+function sim(){
   bgColor = startBGColor;
   displayObjects();
 }
@@ -114,15 +112,40 @@ function endSim(){
   }
 }
 
+function setupObjects(){
+  player = new Character(100, 100, 10);
+  npc = new Character(200, 200, 20);
+  npc.setRandomVelocity();
+
+  for(let i = 0; i < width + heartSize; i += heartSize){
+    hearts[i] = [];
+    for(let j = 0; j < height + heartSize; j += heartSize){
+      hearts[i][j] = new Heart(i + heartSize/2 - heartSize, j + heartSize/2 - heartSize, heartSize/2);
+    }
+  }
+}
+
 function displayObjects(){
-  for(let i = 0; i < width; i += heartSize){
-    for(let j = 0; j < height; j += heartSize){
+  player.move(mouseX, mouseY);
+  player.display();
+
+  while(npc.x + npc.vx <= 0 || npc.x + npc.vx >= width || npc.y + npc.vy <= 0 || npc.y + npc.vy >= height){
+    npc.setRandomVelocity();
+  }
+  npc.move(npc.x + npc.vx, npc.y + npc.vy);
+  npc.display();
+
+  for(let i = 0; i < width + heartSize; i += heartSize){
+    for(let j = 0; j < height + heartSize; j += heartSize){
+      let a = dist(player.x, player.y, npc.x, npc.y);
+      let amap1 = 255 - map(a, 0, width, 0, 255);
+      let amap2 = map(a, 0, width, heartSize * 2, 0);
+
+      hearts[i][j].color(hearts[i][j].r, hearts[i][j].g, hearts[i][j].b, amap1);
+      hearts[i][j].changeSize(amap2);
       hearts[i][j].display();
     }
   }
-
-  player.display();
-  npc.display();
 }
 
 // Heart Class
@@ -145,9 +168,14 @@ class Heart{
     this.a = a;
   }
 
+  changeSize(size){
+    this.size = size;
+  }
+
   display(){
     push();
     fill(this.r, this.g, this.b, this.a);
+    noStroke();
 
     // heart credit: https://editor.p5js.org/Mithru/sketches/Hk1N1mMQg
     beginShape();
@@ -162,10 +190,13 @@ class Heart{
 
 // Character Class
 class Character{
-  constructor(x, y, d){
+  constructor(x, y, diameter){
     this.x = x;
     this.y = y;
-    this.diameter = d;
+    this.vx = 0;
+    this.vy = 0;
+    this.speed = 2;
+    this.diameter = diameter;
 
     this.r = 0;
     this.g = 0;
@@ -178,6 +209,20 @@ class Character{
     this.g = g;
     this.b = b;
     this.a = a;
+  }
+
+  diameter(diameter){
+    this.diameter = diameter;
+  }
+
+  move(x, y){
+    this.x = x;
+    this.y = y;
+  }
+
+  setRandomVelocity(){
+    this.vx = this.speed * random(randDirection) * random(1, 5);
+    this.vy = this.speed * random(randDirection) * random(1, 5);
   }
 
   display(){
