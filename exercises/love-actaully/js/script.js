@@ -37,7 +37,7 @@ let playerSize = 10;
 let npcFake;
 let npcReal;
 let npcSize = 20;
-let realNPCSpeed = 0.5;
+let realNPCSpeed = 0;
 let randDirection = [-1, 1];
 
 let hearts = [];
@@ -96,20 +96,37 @@ function draw() {
 Allows changing of states with a keypress
 */
 function keyPressed(){
-  if(state == states.OPENING || state == states.END || state == states.ENDREAL){
-    state = states.START;
-  }
+  stateSwitch();
 }
 
+/**
+Allows changing of states with mousedown
+*/
+function mousePressed(){
+  stateSwitch();
+}
+
+/**
+Manages changing of states
+*/
+function stateSwitch(){
+  if(state == states.OPENING){
+    state = states.START;
+  }else if (state == states.END || state == states.ENDREAL){
+    state = states.OPENING;
+  }
+}
 
 /**
 Displays the instructions for the simulation
 */
 function openingSim(){
   push();
-  textSize(32);
   fill(0, 0, 0, 255);
-  text("Press any button and move your mouse to try and meet the love of your life!", width/2, height/2);
+  textSize(128);
+  text("LOVE IS BLIND", width/2, height/3);
+  textSize(32);
+  text("1. Move your mouse to control the red circle.\n2. Make two circles touch.\n3. The closer you get the harder it is to see!", width/2, height/2);
   pop();
 }
 
@@ -145,7 +162,7 @@ function endSim(){
   }
   if(timer <= 0){
     timer = 5;
-    state = states.START;
+    state = states.OPENING;
   }
 
   text("Oh no! This isn't the love of your life!\nTry again in " + timer, width/2, height/2);
@@ -164,7 +181,7 @@ function endSimReal(){
   }
   if(timer <= 0){
     timer = 5;
-    state = states.START;
+    state = states.OPENING;
   }
 
   text("Congratulations!\nYou found the love of your life!\nBut try to find someone better in " + timer, width/2, height/2);
@@ -198,9 +215,8 @@ function setupObjects(){
   npcFake.setRandomVelocity();
   npcFake.color(104, 143, 232, 255);
 
-  npcReal = new Character(random(1, width), random(1, height), npcSize);
-  npcReal.setRandomVelocity();
-  npcReal.color(255, 255, 255, 128);
+  npcReal = new Character(npcSize, npcSize, npcSize);
+  npcReal.color(255, 255, 255, 200);
   npcReal.speed = realNPCSpeed;
 
   for(let i = 0; i < width + heartSize; i += heartSize){
@@ -219,7 +235,7 @@ function displayObjects(){
   player.move(mouseX, mouseY);
   player.display();
   displayNPC(npcFake);
-  displayNPC(npcReal);
+  npcReal.display();
 
   for(let i = 0; i < width + heartSize; i += heartSize){
     for(let j = 0; j < height + heartSize; j += heartSize){
