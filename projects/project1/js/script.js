@@ -66,7 +66,7 @@ function draw() {
 
 
 function createInitialCreatures(){
-  c1 = new Creature(500, 500, 2, 50, 255, 0, 0);
+  c1 = new Creature(100, 100, 2, 50, 255, 0, 0);
 }
 
 function setupCreatures(){
@@ -120,6 +120,7 @@ class Creature{
   display(){
     push();
     fill(this.r, this.g, this.b, this.a);
+
 
     // Create body
     rect(this.x, this.y, this.bodySize, this.bodySize);
