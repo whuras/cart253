@@ -61,29 +61,48 @@ Description of draw()
 function draw() {
   background(bgColor);
 
+  moveObjects();
   displayObjects();
 }
 
 
 function createInitialCreatures(){
-  c1 = new Creature(100, 100, 2, 50, 255, 0, 0);
+  c1 = new Creature(250, 250, 2, 50, 255, 0, 0);
 }
 
 function setupCreatures(){
-  c1.setRandomVelocity();
+
 }
 
+// CREDIT: https://editor.p5js.org/pippinbarr/sketches/zCUNjNuEI
+function screenWrapTarget(target) {
+  if (target.x < 0) {
+    target.x += width;
+  } else if (target.x > width) {
+    target.x -= width;
+  }
+
+  if (target.y < 0) {
+    target.y += height;
+  } else if (target.y > height) {
+    target.y -= height;
+  }
+}
+
+function moveObjects(){
+  moveCreature(c1);
+}
+
+function moveCreature(c){
+  c.move();
+  screenWrapTarget(c);
+}
 
 function displayObjects(){
   displayCreature(c1);
 }
 
-
 function displayCreature(c){
-  while(c.x + c.vx <= 0 || c.x + c.vx >= width || c.y + c.vy <= 0 || c.y + c.vy >= height){
-    c.setRandomVelocity();
-  }
-  c.move(c.x + c.vx, c.y + c.vy);
   c.display();
 }
 
@@ -94,9 +113,9 @@ class Creature{
     this.x = x;
     this.y = y;
 
-    this.vx = 0;
-    this.vy = 0;
     this.speed = speed;
+    this.angle = 0;
+    this.t = 0;
 
     this.headDiameter = headDiameter;
     this.bodySize = 50;
@@ -107,25 +126,34 @@ class Creature{
     this.a = 255;
   }
 
-  move(x, y){
-    this.x = x;
-    this.y = y;
-  }
+  // CREDIT: https://editor.p5js.org/pippinbarr/sketches/zCUNjNuEI
+  move(){
+    this.angle = map(noise(this.t), 0, 1, 0, radians(360));
 
-  setRandomVelocity(){
-   this.vx = this.speed * random(randDirection) * random(1, 5);
-   this.vy = this.speed * random(randDirection) * random(1, 5);
+    // Calculate the cartesian velocity of the target with black magic
+    // Or at least with some trigonometry
+    let vx = cos(this.angle) * this.speed;
+    let vy = sin(this.angle) * this.speed;
+
+    // Update the target's position with its velocity
+    this.x += vx;
+    this.y += vy;
+
+    // Update the time value to make the target turn randomly over time
+    this.t += 0.03;
   }
 
   display(){
     push();
     fill(this.r, this.g, this.b, this.a);
 
+    translate(this.x, this.y);
+    rotate(this.angle);
 
     // Create body
-    rect(this.x, this.y, this.bodySize, this.bodySize);
+    rect(0, 0, this.bodySize, this.bodySize);
     // Create head
-    ellipse(this.x + this.bodySize / 2, this.y, this.headDiameter);
+    ellipse(this.bodySize / 2, 0, this.headDiameter);
 
     pop();
   }
