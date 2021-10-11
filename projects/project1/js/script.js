@@ -115,12 +115,15 @@ function draw() {
 function displayMenu(){
   push();
   rectMode(CORNER);
-  fill(0);
-  rect(0, 0, 150, 135);
+  fill(0, 0, 0, 128);
+  rect(0, 0, 275, 170);
   fill(255);
   textAlign(LEFT, TOP);
 
-  let menuText = "Press ESQ to un/pause.\nMax Count: ~" + creaturesMaxCount;
+  let menuText = "Press ESQ to un/pause.";
+  menuText += "\nPress Left/Right Arrows to adjust speed."
+  menuText += "\nPress Up/Down Arrows to adjust reproduction."
+  menuText += "\nMax Count: ~" + creaturesMaxCount;
 
   switch(numCreatureTypes){
     case "6":
@@ -170,6 +173,29 @@ function keyPressed(){
     else if(keyCode == 27 && paused){
       paused = !paused;
       loop();
+    }
+    else if(keyCode == 37){
+      for(let i = 0; i < creatures.length; i++){
+        creatures[i].speed -= 1;
+        if(creatures[i].speed <= 0){
+          creatures[i].speed = 1;
+        }
+      }
+    }
+    else if(keyCode == 39){
+      for(let i = 0; i < creatures.length; i++){
+        creatures[i].speed += 1;
+      }
+    }
+    else if(keyCode == 38){
+      for(let i = 0; i < creatures.length; i++){
+        creatures[i].reproductionTime -= 1;
+      }
+    }
+    else if(keyCode == 40){
+      for(let i = 0; i < creatures.length; i++){
+        creatures[i].reproductionTime += 1;
+      }
     }
   }
 }
