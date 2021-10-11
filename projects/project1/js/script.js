@@ -20,6 +20,9 @@ PLAN: Survival of the Fittest
 - A baby is then spawned with the eater's stats +/- X amount
 - the background gets more red/green/blue as there are greater numbers of each creature group
 - The player can manually do something? NEED IDEAS ON USER INTERACTION !!
+
+IDEAS:
+- Add number to indicate generation
 **************************************************/
 
 "use strict";
@@ -28,7 +31,9 @@ let bgColor = 'rgba(128, 128, 128, 255)';
 let randDirection = [-1, 1];
 
 let creatures = [];
-let creatureSpeed = 2;
+let creaturesCurrentCount = 0;
+let creaturesMaxCount = 100; // to save our computers
+let creatureMinSpeed = 2;
 let creatureReproductionTime = 5;
 let creatureReproductionChance = 0.5;
 
@@ -134,17 +139,17 @@ function end(){
 function createInitialCreatures(){
   switch(numCreatureTypes){
     case "6":
-      append(creatures, new Creature(width/4 * 1, height/3 * 2, creatureSpeed, 50, 0, 255, 255, creatureTypes.CYAN));
+      append(creatures, new Creature(width/4 * 1, height/3 * 2, creatureMinSpeed, 50, 0, 255, 255, creatureTypes.CYAN));
     case "5":
-      append(creatures, new Creature(width/4 * 2, height/3 * 1, creatureSpeed, 50, 255, 255, 0, creatureTypes.YELLOW));
+      append(creatures, new Creature(width/4 * 2, height/3 * 1, creatureMinSpeed, 50, 255, 255, 0, creatureTypes.YELLOW));
     case "4":
-      append(creatures, new Creature(width/4 * 3, height/3 * 2, creatureSpeed, 50, 255, 0, 255, creatureTypes.PURPLE));
+      append(creatures, new Creature(width/4 * 3, height/3 * 2, creatureMinSpeed, 50, 255, 0, 255, creatureTypes.PURPLE));
     case "3":
-      append(creatures, new Creature(width/4 * 2, height/3 * 2, creatureSpeed, 50, 0, 0, 255, creatureTypes.BLUE));
+      append(creatures, new Creature(width/4 * 2, height/3 * 2, creatureMinSpeed, 50, 0, 0, 255, creatureTypes.BLUE));
     case "2":
-      append(creatures, new Creature(width/4 * 3, height/3 * 1, creatureSpeed, 50, 0, 255, 0, creatureTypes.GREEN));
+      append(creatures, new Creature(width/4 * 3, height/3 * 1, creatureMinSpeed, 50, 0, 255, 0, creatureTypes.GREEN));
     case "1":
-      append(creatures, new Creature(width/4 * 1, height/3 * 1, creatureSpeed, 50, 255, 0, 0, creatureTypes.RED));
+      append(creatures, new Creature(width/4 * 1, height/3 * 1, creatureMinSpeed, 50, 255, 0, 0, creatureTypes.RED));
       break;
     default:
       print("ERROR with numCreatureTypes");
@@ -196,6 +201,7 @@ function reproduction(){
 
 class Creature{
   constructor(x, y, speed, headDiameter, r, g, b, type){
+    this.power = 1;
     this.type = type;
 
     this.x = x;
@@ -224,7 +230,8 @@ class Creature{
     }
     else if(this.reproductionCurrentTime >= this.reproductionTime){
       this.reproductionCurrentTime = 0;
-      if(random() < this.reproductionChance){
+      if(random() < this.reproductionChance && creaturesCurrentCount < creaturesMaxCount){
+        creaturesCurrentCount += 1;
         this.reproduce();
       }
     }
@@ -248,11 +255,12 @@ class Creature{
               this.type == creatureTypes.CYAN ||
               this.type == creatureTypes.PURPLE ?
               cv : 0);
+    let speed = this.speed + speedVariance * random(randDirection);
 
     let c = new Creature(
       this.x,
       this.y,
-      this.speed + speedVariance * random(randDirection),
+      speed < creatureMinSpeed ? creatureMinSpeed : speed,
       this.headDiameter,
       r > 255 ? 255 : r,
       g > 255 ? 255 : g,
@@ -263,6 +271,12 @@ class Creature{
     c.reproductionTime = rt <= 0 ? reproductionTimeVariance : rt; // min reproduction time
 
     append(creatures, c);
+  }
+
+  eat(i){
+    this.power += creatures[i].power;
+    creaturesCurrentCount -= 1;
+    creatures.splice(i, 1);
   }
 
   // CREDIT: https://editor.p5js.org/pippinbarr/sketches/zCUNjNuEI
@@ -283,12 +297,17 @@ class Creature{
 
     // Eating logic
     for(let i = 0; i < creatures.length; i++){
+      // ignore self collision or collision with creatures of the same type
       if(creatures[i] == this || creatures[i].type == this.type){
         continue;
       }
+      // check distance between creatures
       let d = dist(this.x, this.y, creatures[i].x, creatures[i].y);
       if(d <= this.headDiameter){
-        creatures.splice(i, 1);
+        // figure out who eats who based on power, or if power is the same then based on reproductionChance
+        if(this.power > creatures[i].power || (this.power == creatures[i].power && this.reproductionChance > random())){
+          this.eat(i);
+        }
         break;
       }
     }
@@ -297,15 +316,18 @@ class Creature{
   display(){
     push();
     fill(this.r, this.g, this.b, this.a);
-
     translate(this.x, this.y);
     rotate(this.angle);
-
     // Create body
     rect(0, 0, this.bodySize, this.bodySize);
     // Create head
     ellipse(this.bodySize / 2, 0, this.headDiameter);
+    pop();
 
+    push();
+    translate(this.x, this.y);
+    fill(0);
+    text(this.power, 5, 5);
     pop();
   }
 }
