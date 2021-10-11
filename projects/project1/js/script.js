@@ -32,14 +32,22 @@ let randDirection = [-1, 1];
 
 let creatures = [];
 let creaturesCurrentCount = 0;
-let creaturesMaxCount = 100; // to save our computers
+let creaturesMaxCount = 50; // to save our computers
 let creatureMinSpeed = 2;
 let creatureReproductionTime = 5;
 let creatureReproductionChance = 0.5;
 
+let rCount = 0;
+let gCount = 0;
+let bCount = 0;
+let yCount = 0;
+let pCount = 0;
+let cCount = 0;
+
 let reproductionTimeVariance = 1;
 let speedVariance = 0.5;
 let colorVariance = 50;
+let childPowerMultiplier = 0.5;
 
 let numCreatureTypes = 3;
 let creatureTypes = {
@@ -51,6 +59,7 @@ let creatureTypes = {
   PURPLE: "purple"
 }
 
+let paused = false;
 let gameState;
 let gameStates = {
   TITLE: "title",
@@ -96,10 +105,44 @@ function draw() {
   }
   else if (gameState == gameStates.SIM){
     simulation();
+    displayMenu();
   }
   else if (gameState == gameStates.END){
     end();
   }
+}
+
+function displayMenu(){
+  push();
+  rectMode(CORNER);
+  fill(0);
+  rect(0, 0, 150, 135);
+  fill(255);
+  textAlign(LEFT, TOP);
+
+  let menuText = "Press ESQ to un/pause.\nMax Count: ~" + creaturesMaxCount;
+
+  switch(numCreatureTypes){
+    case "6":
+      menuText += "\nCyan: " + cCount;
+    case "5":
+      menuText += "\nYellow: " + yCount;
+    case "4":
+      menuText += "\nPurple: " + pCount;
+    case "3":
+      menuText += "\nBlue: " + bCount;
+    case "2":
+      menuText += "\nGreen: " + gCount;
+    case "1":
+      menuText += "\nRed: " + rCount;
+    break;
+    default:
+    print("ERROR with numCreatureTypes");
+  }
+
+  text(menuText, 10, 10);
+
+  pop();
 }
 
 function title(){
@@ -117,6 +160,16 @@ function keyPressed(){
     if(key >= 1 && key <= 6){
       numCreatureTypes = key;
       gameState = gameStates.INIT;
+    }
+  }
+  else if(gameState == gameStates.SIM){
+    if(keyCode == 27 && !paused){
+      paused = !paused;
+      noLoop();
+    }
+    else if(keyCode == 27 && paused){
+      paused = !paused;
+      loop();
     }
   }
 }
@@ -139,17 +192,23 @@ function end(){
 function createInitialCreatures(){
   switch(numCreatureTypes){
     case "6":
-      append(creatures, new Creature(width/4 * 1, height/3 * 2, creatureMinSpeed, 50, 0, 255, 255, creatureTypes.CYAN));
+      cCount++;
+      append(creatures, new Creature(width/4 * 1, height/3 * 2, creatureMinSpeed, 50, 0, 255, 255, creatureTypes.CYAN, 1));
     case "5":
-      append(creatures, new Creature(width/4 * 2, height/3 * 1, creatureMinSpeed, 50, 255, 255, 0, creatureTypes.YELLOW));
+      yCount++;
+      append(creatures, new Creature(width/4 * 2, height/3 * 1, creatureMinSpeed, 50, 255, 255, 0, creatureTypes.YELLOW, 1));
     case "4":
-      append(creatures, new Creature(width/4 * 3, height/3 * 2, creatureMinSpeed, 50, 255, 0, 255, creatureTypes.PURPLE));
+      pCount++;
+      append(creatures, new Creature(width/4 * 3, height/3 * 2, creatureMinSpeed, 50, 255, 0, 255, creatureTypes.PURPLE, 1));
     case "3":
-      append(creatures, new Creature(width/4 * 2, height/3 * 2, creatureMinSpeed, 50, 0, 0, 255, creatureTypes.BLUE));
+      bCount++;
+      append(creatures, new Creature(width/4 * 2, height/3 * 2, creatureMinSpeed, 50, 0, 0, 255, creatureTypes.BLUE, 1));
     case "2":
-      append(creatures, new Creature(width/4 * 3, height/3 * 1, creatureMinSpeed, 50, 0, 255, 0, creatureTypes.GREEN));
+      gCount++;
+      append(creatures, new Creature(width/4 * 3, height/3 * 1, creatureMinSpeed, 50, 0, 255, 0, creatureTypes.GREEN, 1));
     case "1":
-      append(creatures, new Creature(width/4 * 1, height/3 * 1, creatureMinSpeed, 50, 255, 0, 0, creatureTypes.RED));
+      rCount++;
+      append(creatures, new Creature(width/4 * 1, height/3 * 1, creatureMinSpeed, 50, 255, 0, 0, creatureTypes.RED, 1));
       break;
     default:
       print("ERROR with numCreatureTypes");
@@ -199,9 +258,36 @@ function reproduction(){
   }
 }
 
+function adjCreatureCount(c, x){
+  switch(c.type){
+    case creatureTypes.CYAN:
+      cCount += x;
+      break;
+    case creatureTypes.YELLOW:
+      yCount += x;
+      break;
+    case creatureTypes.PURPLE:
+      pCount += x;
+      break;
+    case creatureTypes.BLUE:
+      bCount += x;
+      break;
+    case creatureTypes.GREEN:
+      gCount += x;
+      break;
+    case creatureTypes.RED:
+      rCount += x;
+      break;
+    default:
+      print("ERROR with adjCreatureCount");
+      break;
+  }
+}
+
 class Creature{
-  constructor(x, y, speed, headDiameter, r, g, b, type){
+  constructor(x, y, speed, headDiameter, r, g, b, type, generation){
     this.power = 1;
+    this.generation = generation;
     this.type = type;
 
     this.x = x;
@@ -262,19 +348,26 @@ class Creature{
       this.y,
       speed < creatureMinSpeed ? creatureMinSpeed : speed,
       this.headDiameter,
-      r > 255 ? 255 : r,
-      g > 255 ? 255 : g,
-      b > 255 ? 255 : b,
-      this.type);
+      r > 255 || r < 0 ? 255 : r,
+      g > 255 || g < 0 ? 255 : g,
+      b > 255 || b < 0 ? 255 : b,
+      this.type,
+      this.generation + 1);
 
     let rt = this.reproductionTime + reproductionTimeVariance * random(randDirection);
     c.reproductionTime = rt <= 0 ? reproductionTimeVariance : rt; // min reproduction time
+
+    let pow = this.power * childPowerMultiplier;
+    c.power = pow < 1 ? 1 : pow;
+
+    adjCreatureCount(c, 1);
 
     append(creatures, c);
   }
 
   eat(i){
     this.power += creatures[i].power;
+    adjCreatureCount(creatures[i], -1);
     creaturesCurrentCount -= 1;
     creatures.splice(i, 1);
   }
@@ -325,9 +418,10 @@ class Creature{
     pop();
 
     push();
+    textAlign(CENTER);
     translate(this.x, this.y);
     fill(0);
-    text(this.power, 5, 5);
+    text("Pow: " + this.power + "\nGen: " + this.generation, 5, 5);
     pop();
   }
 }
