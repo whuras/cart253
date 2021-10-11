@@ -26,7 +26,16 @@ PLAN: Survival of the Fittest
 
 let bgColor = 'rgba(128, 128, 128, 255)';
 let randDirection = [-1, 1];
-let c1;
+
+let creatures = [];
+let creatureSpeed = 2;
+let creatureReproductionTime = 5;
+let creatureReproductionChance = 0.5;
+
+let reproductionTimeVariance = 1;
+let speedVariance = 0.5;
+let colorVariance = 50;
+
 const creatureTypes = {
   RED: "red",
   GREEN: "green",
@@ -51,7 +60,6 @@ function setup() {
   ellipseMode(CENTER);
 
   createInitialCreatures();
-  setupCreatures();
 }
 
 
@@ -63,15 +71,14 @@ function draw() {
 
   moveObjects();
   displayObjects();
+  reproduction();
 }
 
 
 function createInitialCreatures(){
-  c1 = new Creature(250, 250, 2, 50, 255, 0, 0);
-}
-
-function setupCreatures(){
-
+  append(creatures, new Creature(width/4, height/4, creatureSpeed, 50, 255, 0, 0, creatureTypes.RED));
+  append(creatures, new Creature(width/4 * 3, height/4, creatureSpeed, 50, 0, 255, 0, creatureTypes.GREEN));
+  append(creatures, new Creature(width/2, height/4 * 3, creatureSpeed, 50, 0, 0, 255, creatureTypes.BLUE));
 }
 
 // CREDIT: https://editor.p5js.org/pippinbarr/sketches/zCUNjNuEI
@@ -90,7 +97,9 @@ function screenWrapTarget(target) {
 }
 
 function moveObjects(){
-  moveCreature(c1);
+  for(let i = 0; i < creatures.length; i++){
+    moveCreature(creatures[i]);
+  }
 }
 
 function moveCreature(c){
@@ -99,11 +108,19 @@ function moveCreature(c){
 }
 
 function displayObjects(){
-  displayCreature(c1);
+  for(let i = 0; i < creatures.length; i++){
+    displayCreature(creatures[i]);
+  }
 }
 
 function displayCreature(c){
   c.display();
+}
+
+function reproduction(){
+  for(let i = 0; i < creatures.length; i++){
+    creatures[i].reproductionTimer();
+  }
 }
 
 class Creature{
@@ -120,10 +137,44 @@ class Creature{
     this.headDiameter = headDiameter;
     this.bodySize = 50;
 
+    this.reproductionTime = creatureReproductionTime;
+    this.reproductionCurrentTime = 0;
+    this.reproductionChance = creatureReproductionChance;
+
     this.r = r;
     this.g = g;
     this.b = b;
     this.a = 255;
+  }
+
+  reproductionTimer(){
+    if(frameCount % 60 == 0 && this.reproductionCurrentTime < this.reproductionTime){
+      this.reproductionCurrentTime++;
+    }
+    else if(this.reproductionCurrentTime >= this.reproductionTime){
+      this.reproductionCurrentTime = 0;
+      if(random() < this.reproductionChance){
+        this.reproduce();
+      }
+    }
+  }
+
+  reproduce(){
+    // randomize some variables, inherit some variables
+    let c = new Creature(
+      this.x,
+      this.y,
+      this.speed + speedVariance * random(randDirection),
+      this.headDiameter,
+      this.r + (this.type == creatureTypes.RED ? colorVariance * random(randDirection) : 0),
+      this.g + (this.type == creatureTypes.GREEN ? colorVariance * random(randDirection) : 0),
+      this.b + (this.type == creatureTypes.BLUE ? colorVariance * random(randDirection) : 0),
+      this.type);
+
+    let r = this.reproductionTime + reproductionTimeVariance * random(randDirection);
+    c.reproductionTime = r <= 0 ? reproductionTimeVariance : r; // min reproduction time
+
+    append(creatures, c);
   }
 
   // CREDIT: https://editor.p5js.org/pippinbarr/sketches/zCUNjNuEI
@@ -140,7 +191,18 @@ class Creature{
     this.y += vy;
 
     // Update the time value to make the target turn randomly over time
-    this.t += 0.03;
+    this.t += random(0.01, 0.05) * random(randDirection);
+
+    for(let i = 0; i < creatures.length; i++){
+      if(creatures[i] == this || creatures[i].type == this.type){
+        continue;
+      }
+      let d = dist(this.x, this.y, creatures[i].x, creatures[i].y);
+      if(d <= this.headDiameter){
+        creatures.splice(i, 1);
+        break;
+      }
+    }
   }
 
   display(){
