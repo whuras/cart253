@@ -36,6 +36,7 @@ let reproductionTimeVariance = 1;
 let speedVariance = 0.5;
 let colorVariance = 50;
 
+let numCreatureTypes = 3;
 let creatureTypes = {
   RED: "red",
   GREEN: "green",
@@ -70,6 +71,7 @@ function setup() {
   rectMode(CENTER);
   ellipseMode(CENTER);
 
+
   gameState = gameStates.TITLE;
 
 }
@@ -84,7 +86,7 @@ function draw() {
   if(gameState == gameStates.TITLE){
     title();
   }
-  else if (gameState == gameStates.SETUP){
+  else if (gameState == gameStates.INIT){
     init();
   }
   else if (gameState == gameStates.SIM){
@@ -96,11 +98,27 @@ function draw() {
 }
 
 function title(){
+  push();
+  textAlign(CENTER);
+  textSize(64);
+  text("Survival Simulator", width/2, height/3);
+  textSize(32);
+  text("Enter the number of different types of creatures to simulate (1-6).", width/2, height/2);
+  pop();
+}
 
+function keyPressed(){
+  if(gameState == gameStates.TITLE){
+    if(key >= 1 && key <= 6){
+      numCreatureTypes = key;
+      gameState = gameStates.INIT;
+    }
+  }
 }
 
 function init(){
   createInitialCreatures();
+  gameState = gameStates.SIM;
 }
 
 function simulation(){
@@ -114,9 +132,24 @@ function end(){
 }
 
 function createInitialCreatures(){
-  append(creatures, new Creature(width/4, height/4, creatureSpeed, 50, 255, 0, 0, creatureTypes.RED));
-  append(creatures, new Creature(width/4 * 3, height/4, creatureSpeed, 50, 0, 255, 0, creatureTypes.GREEN));
-  append(creatures, new Creature(width/2, height/4 * 3, creatureSpeed, 50, 0, 0, 255, creatureTypes.BLUE));
+  switch(numCreatureTypes){
+    case "6":
+      append(creatures, new Creature(width/4 * 1, height/3 * 2, creatureSpeed, 50, 0, 255, 255, creatureTypes.CYAN));
+    case "5":
+      append(creatures, new Creature(width/4 * 2, height/3 * 1, creatureSpeed, 50, 255, 255, 0, creatureTypes.YELLOW));
+    case "4":
+      append(creatures, new Creature(width/4 * 3, height/3 * 2, creatureSpeed, 50, 255, 0, 255, creatureTypes.PURPLE));
+    case "3":
+      append(creatures, new Creature(width/4 * 2, height/3 * 2, creatureSpeed, 50, 0, 0, 255, creatureTypes.BLUE));
+    case "2":
+      append(creatures, new Creature(width/4 * 3, height/3 * 1, creatureSpeed, 50, 0, 255, 0, creatureTypes.GREEN));
+    case "1":
+      append(creatures, new Creature(width/4 * 1, height/3 * 1, creatureSpeed, 50, 255, 0, 0, creatureTypes.RED));
+      break;
+    default:
+      print("ERROR with numCreatureTypes");
+      break;
+  }
 }
 
 // CREDIT: https://editor.p5js.org/pippinbarr/sketches/zCUNjNuEI
@@ -199,18 +232,35 @@ class Creature{
 
   reproduce(){
     // randomize some variables, inherit some variables
+    let cv = colorVariance * random(randDirection);
+    let r = this.r + (
+              this.type == creatureTypes.RED ||
+              this.type == creatureTypes.PURPLE ||
+              this.type == creatureTypes.YELLOW ?
+              cv : 0);
+    let g = this.g + (
+              this.type == creatureTypes.GREEN ||
+              this.type == creatureTypes.YELLOW ||
+              this.type == creatureTypes.CYAN ?
+              cv : 0);
+    let b = this.b + (
+              this.type == creatureTypes.BLUE ||
+              this.type == creatureTypes.CYAN ||
+              this.type == creatureTypes.PURPLE ?
+              cv : 0);
+
     let c = new Creature(
       this.x,
       this.y,
       this.speed + speedVariance * random(randDirection),
       this.headDiameter,
-      this.r + (this.type == creatureTypes.RED ? colorVariance * random(randDirection) : 0),
-      this.g + (this.type == creatureTypes.GREEN ? colorVariance * random(randDirection) : 0),
-      this.b + (this.type == creatureTypes.BLUE ? colorVariance * random(randDirection) : 0),
+      r > 255 ? 255 : r,
+      g > 255 ? 255 : g,
+      b > 255 ? 255 : b,
       this.type);
 
-    let r = this.reproductionTime + reproductionTimeVariance * random(randDirection);
-    c.reproductionTime = r <= 0 ? reproductionTimeVariance : r; // min reproduction time
+    let rt = this.reproductionTime + reproductionTimeVariance * random(randDirection);
+    c.reproductionTime = rt <= 0 ? reproductionTimeVariance : rt; // min reproduction time
 
     append(creatures, c);
   }
