@@ -36,10 +36,21 @@ let reproductionTimeVariance = 1;
 let speedVariance = 0.5;
 let colorVariance = 50;
 
-const creatureTypes = {
+let creatureTypes = {
   RED: "red",
   GREEN: "green",
-  BLUE: "blue"
+  BLUE: "blue",
+  YELLOW: "yellow",
+  CYAN: "cyan",
+  PURPLE: "purple"
+}
+
+let gameState;
+let gameStates = {
+  TITLE: "title",
+  INIT: "init",
+  SIM: "sim",
+  END: "end"
 }
 
 /**
@@ -59,7 +70,8 @@ function setup() {
   rectMode(CENTER);
   ellipseMode(CENTER);
 
-  createInitialCreatures();
+  gameState = gameStates.TITLE;
+
 }
 
 
@@ -69,11 +81,37 @@ Description of draw()
 function draw() {
   background(bgColor);
 
+  if(gameState == gameStates.TITLE){
+    title();
+  }
+  else if (gameState == gameStates.SETUP){
+    init();
+  }
+  else if (gameState == gameStates.SIM){
+    simulation();
+  }
+  else if (gameState == gameStates.END){
+    end();
+  }
+}
+
+function title(){
+
+}
+
+function init(){
+  createInitialCreatures();
+}
+
+function simulation(){
   moveObjects();
   displayObjects();
   reproduction();
 }
 
+function end(){
+
+}
 
 function createInitialCreatures(){
   append(creatures, new Creature(width/4, height/4, creatureSpeed, 50, 255, 0, 0, creatureTypes.RED));
@@ -193,6 +231,7 @@ class Creature{
     // Update the time value to make the target turn randomly over time
     this.t += random(0.01, 0.05) * random(randDirection);
 
+    // Eating logic
     for(let i = 0; i < creatures.length; i++){
       if(creatures[i] == this || creatures[i].type == this.type){
         continue;
