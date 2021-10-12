@@ -367,7 +367,7 @@ class Creature{
     this.t = 0;
 
     this.headDiameter = headDiameter;
-    this.bodySize = 50;
+    this.size = 50;
 
     this.reproductionTime = creatureReproductionTime;
     this.reproductionCurrentTime = 0;
@@ -477,19 +477,36 @@ class Creature{
     push();
     fill(this.r, this.g, this.b, this.a);
     translate(this.x, this.y);
-    rotate(this.angle);
+    rotate(this.angle + 180);
+
+    let halfbase = ((2 / sqrt(3)) * this.size) / 2;
     // Create body
-    triangle(0, 0, -50, 25, -50, -25);
-    //rect(0, 0, this.bodySize, this.bodySize);
+    triangle(0, 0, -halfbase / 2, -this.size, halfbase / 2, -this.size);
+
     // Create head
-    ellipse(0, 0, this.headDiameter);
+    triangle(0, this.size / 2, -halfbase, -this.size / 2, halfbase, -this.size / 2);
+
+    // Create eye
+    fill(0);
+    //circle(5, 0, 3);
+    circle(-5, 0, 3);
+
+    // Create eyebrow
+    noFill();
+    //arc(5, 0, 10, 10, 180, 200);
+    arc(-5, 0, 10, 10, 180, 200);
+
+    // Create mouth
+    arc(0, 0, 25, 25, radians(310), radians(375));
+
     pop();
 
     push();
     textAlign(CENTER);
-    translate(this.x - 7, this.y - 7);
+    translate(this.x, this.y);
     fill(0);
-    text("Pow: " + round(this.power, 2) + "\nGen: " + this.generation, 5, 5);
+    textSize(8);
+    text("Pow: " + round(this.power, 2), 0, -15);//+ "\nGen: " + this.generation, 0, 0);
     pop();
   }
 }
