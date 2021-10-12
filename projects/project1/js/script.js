@@ -2,27 +2,16 @@
 Project 1: Simulation
 Wayne Huras ID 40074423
 Requirements:
-- At least two moving elements
-- Interactivity
+x At least two moving elements
+x Interactivity
 - Aesthetic, conceptual, and procedural harmony
-- Beginning, middle, and end (if it makes sense)
+x Beginning, middle, and end (if it makes sense)
+
 Evaluation:
-- Functional: The program runs and meets the brief in terms of functionality and code requirements, shows mastery of the course material
-- Stylish: Code follows the relevant parts of the style guide
-- Committed: Commits and messages follow the style guide
-- Creative: The program is an interesting and expressive experience for the user
-
-PLAN: Survival of the Fittest
-- 3 Groups of creatures (identified by shades of red, green, blue)
-- Each creature has variables set with random values for speed, size, ...?
-- Creatures are made up for two components: body and head/mouth
-- When a creature's head/mouth runs into another creature's body, they are eaten (if they are from a different group)
-- A baby is then spawned with the eater's stats +/- X amount
-- the background gets more red/green/blue as there are greater numbers of each creature group
-- The player can manually do something? NEED IDEAS ON USER INTERACTION !!
-
-IDEAS:
-- Add number to indicate generation
+x Functional: The program runs and meets the brief in terms of functionality and code requirements, shows mastery of the course material
+x Stylish: Code follows the relevant parts of the style guide
+x Committed: Commits and messages follow the style guide
+x Creative: The program is an interesting and expressive experience for the user
 **************************************************/
 
 "use strict";
@@ -32,7 +21,7 @@ let randDirection = [-1, 1];
 
 let creatures = [];
 let creaturesCurrentCount = 0;
-let creaturesMaxCount = 50; // to save our computers
+let creaturesMaxCount = 50; // to save our processing power
 let creatureMinSpeed = 2;
 let creatureReproductionTime = 5;
 let creatureReproductionChance = 0.5;
@@ -85,9 +74,7 @@ function setup() {
   rectMode(CENTER);
   ellipseMode(CENTER);
 
-
   gameState = gameStates.TITLE;
-
 }
 
 
@@ -112,6 +99,10 @@ function draw() {
   }
 }
 
+
+/**
+Displays the menu in the top left of the game screen
+*/
 function displayMenu(){
   push();
   rectMode(CORNER);
@@ -123,7 +114,7 @@ function displayMenu(){
   let menuText = "Press ESQ to un/pause.";
   menuText += "\nPress Left/Right Arrows to adjust speed."
   menuText += "\nPress Up/Down Arrows to adjust reproduction."
-  menuText += "\nMax Count: ~" + creaturesMaxCount;
+  menuText += "\nMax Count: " + creaturesMaxCount;
 
   switch(numCreatureTypes){
     case "6":
@@ -144,10 +135,13 @@ function displayMenu(){
   }
 
   text(menuText, 10, 10);
-
   pop();
 }
 
+
+/**
+Welcome/Title screen display
+*/
 function title(){
   push();
   textAlign(CENTER);
@@ -158,6 +152,10 @@ function title(){
   pop();
 }
 
+
+/**
+Handles key presses of increasing reproduction/speed of creatures and pausing
+*/
 function keyPressed(){
   if(gameState == gameStates.TITLE){
     if(key >= 1 && key <= 6){
@@ -200,40 +198,50 @@ function keyPressed(){
   }
 }
 
+
+/**
+Initializes first set of creatures
+*/
 function init(){
   createInitialCreatures();
   gameState = gameStates.SIM;
 }
 
+
+/**
+Handles the survival simulation
+*/
 function simulation(){
   moveObjects();
   displayObjects();
   reproduction();
 }
 
+
+/**
+End screen
+*/
 function end(){
 
 }
 
+
+/**
+Initializes the first creatures with their spaced-out positioning
+*/
 function createInitialCreatures(){
   switch(numCreatureTypes){
     case "6":
-      cCount++;
       append(creatures, new Creature(width/4 * 1, height/3 * 2, creatureMinSpeed, 50, 0, 255, 255, creatureTypes.CYAN, 1));
     case "5":
-      yCount++;
       append(creatures, new Creature(width/4 * 2, height/3 * 1, creatureMinSpeed, 50, 255, 255, 0, creatureTypes.YELLOW, 1));
     case "4":
-      pCount++;
       append(creatures, new Creature(width/4 * 3, height/3 * 2, creatureMinSpeed, 50, 255, 0, 255, creatureTypes.PURPLE, 1));
     case "3":
-      bCount++;
       append(creatures, new Creature(width/4 * 2, height/3 * 2, creatureMinSpeed, 50, 0, 0, 255, creatureTypes.BLUE, 1));
     case "2":
-      gCount++;
       append(creatures, new Creature(width/4 * 3, height/3 * 1, creatureMinSpeed, 50, 0, 255, 0, creatureTypes.GREEN, 1));
     case "1":
-      rCount++;
       append(creatures, new Creature(width/4 * 1, height/3 * 1, creatureMinSpeed, 50, 255, 0, 0, creatureTypes.RED, 1));
       break;
     default:
@@ -242,7 +250,11 @@ function createInitialCreatures(){
   }
 }
 
-// CREDIT: https://editor.p5js.org/pippinbarr/sketches/zCUNjNuEI
+
+/**
+Moves creatures from one side of the screen to another if they move off it
+CREDIT: https://editor.p5js.org/pippinbarr/sketches/zCUNjNuEI
+*/
 function screenWrapTarget(target) {
   if (target.x < 0) {
     target.x += width;
@@ -257,35 +269,62 @@ function screenWrapTarget(target) {
   }
 }
 
+
+/**
+Handles movement of all objects
+*/
 function moveObjects(){
   for(let i = 0; i < creatures.length; i++){
     moveCreature(creatures[i]);
   }
 }
 
+
+/**
+Handles movement specifically for creatures
+*/
 function moveCreature(c){
   c.move();
   screenWrapTarget(c);
 }
 
+
+/**
+Handles display of all objects
+*/
 function displayObjects(){
   for(let i = 0; i < creatures.length; i++){
     displayCreature(creatures[i]);
   }
 }
 
+
+/**
+Handles display specifically for creatures
+*/
 function displayCreature(c){
   c.display();
 }
 
+
+/**
+Increments the reproduction timer for all creatures
+*/
 function reproduction(){
   for(let i = 0; i < creatures.length; i++){
     creatures[i].reproductionTimer();
   }
 }
 
-function adjCreatureCount(c, x){
-  switch(c.type){
+
+/**
+Adjusts the counts of different types of creatures to help manage processing power
+*/
+function adjCreatureCount(t, x){
+
+  creaturesCurrentCount += x;
+
+  switch(t){
     case creatureTypes.CYAN:
       cCount += x;
       break;
@@ -310,6 +349,10 @@ function adjCreatureCount(c, x){
   }
 }
 
+
+/**
+Creature class
+*/
 class Creature{
   constructor(x, y, speed, headDiameter, r, g, b, type, generation){
     this.power = 1;
@@ -334,6 +377,8 @@ class Creature{
     this.g = g;
     this.b = b;
     this.a = 255;
+
+    adjCreatureCount(type, 1);
   }
 
   reproductionTimer(){
@@ -343,7 +388,6 @@ class Creature{
     else if(this.reproductionCurrentTime >= this.reproductionTime){
       this.reproductionCurrentTime = 0;
       if(random() < this.reproductionChance && creaturesCurrentCount < creaturesMaxCount){
-        creaturesCurrentCount += 1;
         this.reproduce();
       }
     }
@@ -386,15 +430,12 @@ class Creature{
     let pow = this.power * childPowerMultiplier;
     c.power = pow < 1 ? 1 : pow;
 
-    adjCreatureCount(c, 1);
-
     append(creatures, c);
   }
 
   eat(i){
     this.power += creatures[i].power;
-    adjCreatureCount(creatures[i], -1);
-    creaturesCurrentCount -= 1;
+    adjCreatureCount(creatures[i].type, -1);
     creatures.splice(i, 1);
   }
 
@@ -438,16 +479,17 @@ class Creature{
     translate(this.x, this.y);
     rotate(this.angle);
     // Create body
-    rect(0, 0, this.bodySize, this.bodySize);
+    triangle(0, 0, -50, 25, -50, -25);
+    //rect(0, 0, this.bodySize, this.bodySize);
     // Create head
-    ellipse(this.bodySize / 2, 0, this.headDiameter);
+    ellipse(0, 0, this.headDiameter);
     pop();
 
     push();
     textAlign(CENTER);
-    translate(this.x, this.y);
+    translate(this.x - 7, this.y - 7);
     fill(0);
-    text("Pow: " + this.power + "\nGen: " + this.generation, 5, 5);
+    text("Pow: " + round(this.power, 2) + "\nGen: " + this.generation, 5, 5);
     pop();
   }
 }
