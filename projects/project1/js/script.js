@@ -4,7 +4,7 @@ Wayne Huras ID 40074423
 Requirements:
 x At least two moving elements
 x Interactivity
-- Aesthetic, conceptual, and procedural harmony
+x Aesthetic, conceptual, and procedural harmony
 x Beginning, middle, and end (if it makes sense)
 
 Evaluation:
@@ -16,8 +16,10 @@ x Creative: The program is an interesting and expressive experience for the user
 
 "use strict";
 
-let bgColor = 'rgba(144, 224, 239, 255)';
-let bgColor2 = 'rgba(0, 150, 199, 255)';
+let bgColor = 'rgba(204, 219, 220, 255)';
+let bgColor2 = 'rgba(154, 209, 212, 255)';
+let bgColor3 = 'rgba(128, 206, 215, 255)';
+let bgColor4 = 'rgba(0, 126, 167, 255)';
 let randDirection = [-1, 1];
 
 let creatures = [];
@@ -109,6 +111,20 @@ Displays the background colours
 */
 function displayBackground(){
   background(bgColor);
+  push();
+  noStroke();
+  fill(bgColor2)
+  ellipse(width/2, height/4 * 3, width, height);
+  rect(width/2, height/4 * 5, width, height);
+
+  fill(bgColor3)
+  ellipse(width/2, height/4 * 4, width, height);
+  rect(width/2, height/4 * 6, width, height);
+
+  fill(bgColor4)
+  ellipse(width/2, height/4 * 5, width, height);
+  rect(width/2, height/4 * 7, width, height);
+  pop();
 }
 
 
@@ -120,7 +136,7 @@ function checkCounts(){
     // Red wins
     winner = creatureTypes.RED;
   }
-  else if(gCount == 0 && bCount == 0 && pCount == 0 && yCount == 0 && cCount == 0){
+  else if(rCount == 0 && bCount == 0 && pCount == 0 && yCount == 0 && cCount == 0){
     // Green wins
     winner = creatureTypes.GREEN;
   }
@@ -187,25 +203,6 @@ function displayMenu(){
 
 
 /**
-Welcome/Title screen display
-*/
-function title(){
-
-  rCount = gCount = bCount = pCount = yCount = cCount = 0;
-  winner = undefined;
-  creatures = [];
-
-  push();
-  textAlign(CENTER);
-  textSize(64);
-  text("Survival Simulator", width/2, height/3);
-  textSize(32);
-  text("Enter the number of different types of creatures to simulate (1-6).", width/2, height/2);
-  pop();
-}
-
-
-/**
 Handles key presses of increasing reproduction/speed of creatures and pausing
 */
 function keyPressed(){
@@ -249,6 +246,28 @@ function keyPressed(){
       }
     }
   }
+}
+
+
+/**
+Welcome/Title screen display
+*/
+function title(){
+
+  rCount = gCount = bCount = pCount = yCount = cCount = 0;
+  winner = undefined;
+  creatures = [];
+  creaturesCurrentCount = 0;
+  creatureReproductionTime = 5;
+  creatureReproductionChance = 0.5;
+
+  push();
+  textAlign(CENTER);
+  textSize(64);
+  text("Swarm Survival Simulator", width/2, height/3);
+  textSize(32);
+  text("Enter the number of different types of creature types to simulate (1-6).", width/2, height/2);
+  pop();
 }
 
 
