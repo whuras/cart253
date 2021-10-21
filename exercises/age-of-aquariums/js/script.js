@@ -19,6 +19,9 @@ Evaluation:
 let school = [];
 let schoolSize = 10;
 
+let gameTimer = 10;
+let timer = 0;
+
 let avoLeft;
 let avoRight;
 let avoImgWidth = 105;
@@ -33,8 +36,8 @@ let dinoAnimationFrames = [];
 let eatingAnimationFrames = [];
 
 let isEating = false;
-let eatingTimer = 1;
-let timer = 0;
+let eatTimer = 1;
+let eatingTimer = 0;
 
 let prevX = 0;
 let flip = false;
@@ -81,15 +84,7 @@ function setup() {
 Description of draw()
 */
 function draw() {
-
   background(color("#8EB1C7"));
-  drawGround();
-
-  if(isEating){
-    eatAnimation();
-  }else{
-    dinoAnimation();
-  }
 
   if(state == states.TITLE){
     title();
@@ -106,16 +101,23 @@ function draw() {
   else if(state == states.ENDDOS){
 
   }
-
 }
 
 
-function drawSun(){
+function drawMeteor(x, y){
   push();
-  noStroke;
+  rotate(radians(5));
+  ellipseMode(CENTER);
+  noStroke();
 
-  fill();
-  ellipse();
+  fill(250, 225, 103, 64);
+  ellipse(x - 150, y, 400, 125);
+
+  fill(250, 225, 103, 128);
+  ellipse(x - 50, y, 200, 100);
+
+  fill(250, 225, 103, 255);
+  ellipse(x, y, 100, 100);
 
   pop();
 }
@@ -140,11 +142,11 @@ function eatAnimation(){
   let wScalar = map(mouseY, 0, height, 0.25, 1);
   let scaledWidth = dinoNomImgWidth * wScalar;
 
-  if(frameCount % 60 == 0 && timer < eatingTimer){
-    timer++;
+  if(frameCount % 60 == 0 && eatingTimer < eatTimer){
+    eatingTimer++;
   }
-  else if(timer >= eatingTimer){
-    timer = 0;
+  else if(eatingTimer >= eatTimer){
+    eatingTimer = 0;
     isEating = false;
     aniIndex = 0;
   }
@@ -221,6 +223,31 @@ function init(){
 
 
 function sim(){
+
+
+  // game timer
+  if(frameCount % 60 == 0 && timer < gameTimer){
+    timer++;
+  }
+  else if(timer >= gameTimer){
+    timer = 0;
+  }
+
+  // meteor animation
+  let meteorX = map(timer, 0, gameTimer, 0, width);
+  //let meteorY = map(timer, 0, gameTimer, 0, height/5);
+  drawMeteor(meteorX, 0);
+
+  drawGround();
+
+  // dino animation
+  if(isEating){
+    eatAnimation();
+  }else{
+    dinoAnimation();
+  }
+
+  // handle avo movement and display
   for(let i = 0; i < school.length; i++){
     moveFish(school[i]);
     displayFish(school[i]);
