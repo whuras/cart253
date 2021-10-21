@@ -1,11 +1,11 @@
 /**************************************************
 Exercise: Age of Aquariums
 Wayne Huras ID 40074423
-Brief:
+Brief: Focus on for-loops, arrays, and random selection..
 x Add a user-controlled shape (or image)
-- Make the user interact with the fish (or whatever they are in your simulation)
-x Change the fish (or whatever) creation
-- Add at least two endings
+x Make the user interact with the avocado (or whatever they are in your simulation)
+x Change the avocado (or whatever) creation
+x Add at least two endings
 
 Evaluation:
 - Functional (40%)
@@ -16,10 +16,13 @@ Evaluation:
 
 "use strict";
 
-let school = [];
-let schoolSize = 10;
+let swarm = [];
+let dinoAnimationFrames = [];
+let eatingAnimationFrames = [];
 
-let gameTimer = 10;
+let swarmSize = 10;
+
+let gameTimer = 8;
 let timer = 0;
 
 let avoLeft;
@@ -35,14 +38,13 @@ let dinoImgHeight = 136;
 let dinoNomImgWidth = 187;
 let dinoNomImgHeight = 190;
 let aniIndex = 0;
-let dinoAnimationFrames = [];
-let eatingAnimationFrames = [];
-
 
 let isEating = false;
 let eatTimer = 1;
 let eatingTimer = 0;
 
+let meteorTails = 3;
+let explosionRadiants = 4;
 let explosionInterval = 3;
 let explosionTimer = 0;
 
@@ -62,21 +64,19 @@ let states = {
 Description of preload
 */
 function preload() {
+  // load sprites
   avoLeft = loadImage("assets/images/avo_left.png");
   avoRight = loadImage("assets/images/avo_right.png");
 
-  // load dino sprites
-  dinoAnimationFrames[0] = loadImage("assets/images/dino6.png");
-  dinoAnimationFrames[1] = loadImage("assets/images/dino5.png");
-  dinoAnimationFrames[2] = loadImage("assets/images/dino4.png");
-  dinoAnimationFrames[3] = loadImage("assets/images/dino3.png");
-  dinoAnimationFrames[4] = loadImage("assets/images/dino2.png");
-  dinoAnimationFrames[5] = loadImage("assets/images/dino1.png");
-
-  eatingAnimationFrames[0] = loadImage("assets/images/dinonom1.png");
-  eatingAnimationFrames[1] = loadImage("assets/images/dinonom2.png");
-
   dinoSleepImg = loadImage("assets/images/dinosleep.png");
+
+  for(let i = 0; i < 6; i++){
+    dinoAnimationFrames[i] = loadImage("assets/images/dino" + (6 - i) + ".png");
+  }
+
+  for(let i = 0; i < 2; i++){
+    eatingAnimationFrames[i] = loadImage("assets/images/dinonom" + (i + 1) + ".png");
+  }
 }
 
 
@@ -95,41 +95,43 @@ Description of draw()
 function draw() {
   background(color("#8EB1C7"));
 
-  if(state == states.TITLE){
-    title();
-  }
-  else if(state == states.INIT){
-    init();
-  }
-  else if(state == states.SIM){
-    sim();
-  }
-  else if(state == states.ENDUNO){
-    ending(eatingAnimationFrames[0], "Oops, the meteor crashed before the dinosaur could eat its fill! Looks like it died on an empty stomach :(", dinoNomImgWidth, dinoNomImgHeight);
-  }
-  else if(state == states.ENDDOS){
-    ending(dinoSleepImg, "Aww, the dinosaur is sleeping soundly with a full stomach. It didn't even notice the apocalypse :)", dinoSleepImgWidth, dinoSleepImgHeight);
+  switch(state){
+    case states.TITLE:
+      title();
+      break;
+    case states.INIT:
+      init();
+      break;
+    case states.SIM:
+      sim();
+      break;
+    case states.ENDUNO:
+      ending(eatingAnimationFrames[0], "Oops, the meteor crashed before the dinosaur could eat its fill! Looks like it died on an empty stomach :(", dinoNomImgWidth, dinoNomImgHeight);
+      break;
+    case states.ENDDOS:
+      ending(dinoSleepImg, "Aww, the dinosaur is sleeping soundly with a full stomach. It didn't even notice the apocalypse :)", dinoSleepImgWidth, dinoSleepImgHeight);
+      break;
+    default:
+      print("Error in draw state switch.");
   }
 }
 
 
-function drawMeteor(x, y){
+function drawMeteor(){
+  let x = map(timer, 0, gameTimer, 0, width);
+  let y = 0;
+
   push();
   rotate(radians(5));
   ellipseMode(CENTER);
   noStroke();
-
-  fill(250, 225, 103, 64);
-  ellipse(x - 150, y, 400, 125);
-
-  fill(250, 225, 103, 128);
-  ellipse(x - 50, y, 200, 100);
-
-  fill(250, 225, 103, 255);
-  ellipse(x, y, 100, 100);
-
+  for(let i = meteorTails; i > 0; i--){
+    fill(250, 225, 103, 255 / i);
+    ellipse(x - (i - 1) * 100, y, 100 + (i - 1) * 200, 100 + (i - 1) * 10);
+  }
   pop();
 }
+
 
 function drawGround(){
   push();
@@ -142,7 +144,6 @@ function drawGround(){
 
 
 function eatAnimation(){
-
   let yConstrained = constrain(mouseY, height/5, height);
 
   let hScalar = map(mouseY, 0, height, 0.25, 1);
@@ -184,7 +185,6 @@ function eatAnimation(){
 
 
 function dinoAnimation(){
-
   let yConstrained = constrain(mouseY, height/5, height);
 
   let hScalar = map(mouseY, 0, height, 0.25, 1);
@@ -209,7 +209,7 @@ function dinoAnimation(){
   }
 
   aniIndex++;
-  if (aniIndex > 25){
+  if (aniIndex > 24){
     aniIndex = 0;
   }
   prevX = mouseX;
@@ -217,16 +217,30 @@ function dinoAnimation(){
 
 
 function title(){
-  state = states.INIT;
+  push();
+  background(0, 104, 56);
+  rectMode(CENTER);
+  stroke(189, 213, 72);
+  strokeWeight(5);
+  fill(236, 250, 115);
+  rect(width/2, height/2, width/2, height/2);
+
+  noStroke();
+  fill(143, 78, 17);
+  textAlign(CENTER);
+  textSize(64);
+  text("Avocalypse", width/2, height/3);
+  textSize(32);
+  text("Help the Dino eat his full before certain DOOM!\nInstructions: Click to nom.\nClick anywhere to continue.", width/2, height/2);
+  pop();
 }
 
 
 function init(){
-  for(let i = 0; i < schoolSize; i++){
-    let fish = createFish(random(0, width), random(0, height));
-    school.push(fish);
+  for(let i = 0; i < swarmSize; i++){
+    let avocado = createAvocado(random(0, width), random(0, height));
+    swarm.push(avocado);
   }
-
   state = states.SIM;
 }
 
@@ -237,14 +251,10 @@ function sim(){
     timer++;
   }
   else if(timer >= gameTimer){
-    state = school.length > 0 ? states.ENDUNO : states.ENDDUO;
+    state = swarm.length > 0 ? states.ENDUNO : states.ENDDUO;
   }
 
-  // meteor animation
-  let meteorX = map(timer, 0, gameTimer, 0, width);
-  //let meteorY = map(timer, 0, gameTimer, 0, height/5);
-  drawMeteor(meteorX, 0);
-
+  drawMeteor();
   drawGround();
 
   // dino animation
@@ -255,23 +265,23 @@ function sim(){
   }
 
   // handle avo movement and display
-  for(let i = 0; i < school.length; i++){
-    moveFish(school[i]);
-    displayFish(school[i]);
+  for(let i = 0; i < swarm.length; i++){
+    moveAvocado(swarm[i]);
+    displayAvocado(swarm[i]);
   }
 }
 
 
 function ending(img, t, w, h){
-  //let explosionInterval = 10;
-  //let explosionTimer = 0;
-
   drawGround();
 
+  // dino image
   push();
-  image(img, 400, 400, w * 2, h * 2);
+  imageMode(CENTER);
+  image(img, width/2, height/2, w * 2, h * 2);
   pop();
 
+  // Explosion animation
   let explosionX = map(timer, 0, gameTimer, 0, width);
   if(frameCount % 60 == 0 && explosionTimer < explosionInterval){
     explosionTimer++;
@@ -279,24 +289,16 @@ function ending(img, t, w, h){
   else if(explosionTimer >= explosionInterval){
     explosionTimer = 0;
   }
-
   push();
   noStroke();
   ellipseMode(CENTER);
-
-  fill(232,49,81,50);
-  ellipse(explosionX, height/5, width * (explosionTimer + 1), width * (explosionTimer + 1));
-
-  fill(232,49,81,100);
-  ellipse(explosionX, height/5, width * (explosionTimer + 1) / 2, width * (explosionTimer + 1) / 2);
-
-  fill(232,49,81,200);
-  ellipse(explosionX, height/5, width * (explosionTimer + 1) / 3, width * (explosionTimer + 1) / 3);
-
-  fill(232,49,81,255);
-  ellipse(explosionX, height/5, width * (explosionTimer + 1) / 4, width * (explosionTimer + 1) / 4);
+  for(let i = 0; i < explosionRadiants + 1; i++){
+    fill(232, 49, 81, 50 * i);
+    ellipse(explosionX, height / (explosionRadiants + 1), width * (explosionTimer + 1) / (1 + i), width * (explosionTimer + 1) / (1 + i));
+  }
   pop();
 
+  // ending text
   push();
   fill(0, 0, 0, 100);
   rect(10, 10, 400, 250);
@@ -309,8 +311,8 @@ function ending(img, t, w, h){
 }
 
 
-function createFish(x, y){
-  let fish = {
+function createAvocado(x, y){
+  let avocado = {
     x: x,
     y: y,
     fWidth: avoImgWidth,
@@ -319,55 +321,58 @@ function createFish(x, y){
     vy: 0,
     speed: 2
   }
-  return fish;
+  return avocado;
 }
 
-// chooses whether a fish changes directions and moves it
-function moveFish(fish){
+// chooses whether a avocado changes directions and moves it
+function moveAvocado(avocado){
   // choose whether to change direction
   let change = random(0, 1);
   if(change < 0.05){
-    fish.vx = random(-fish.speed, fish.speed);
-    fish.vy = random(-fish.speed, fish.speed);
+    avocado.vx = random(-avocado.speed, avocado.speed);
+    avocado.vy = random(-avocado.speed, avocado.speed);
   }
 
-  // move the fish
-  fish.x = fish.x + fish.vx;
-  fish.y = fish.y + fish.vy;
+  // move the avocado
+  avocado.x = avocado.x + avocado.vx;
+  avocado.y = avocado.y + avocado.vy;
 
-  // constrain the fish to the canvas
-  fish.x = constrain(fish.x, 0, width);
-  fish.y = constrain(fish.y, height/5, height);
+  // constrain the avocado to the canvas
+  avocado.x = constrain(avocado.x, 0, width);
+  avocado.y = constrain(avocado.y, height/5, height);
 }
 
-// displays the provided fish on the canvas
-function displayFish(fish){
+// displays the provided avocado on the canvas
+function displayAvocado(avocado){
   push();
 
-  let hScalar = map(fish.y, 0, height, 0.25, 1);
-  let scaledHeight = fish.fHeight * hScalar;
+  let hScalar = map(avocado.y, 0, height, 0.25, 1);
+  let scaledHeight = avocado.fHeight * hScalar;
 
-  let wScalar = map(fish.y, 0, height, 0.25, 1);
-  let scaledWidth = fish.fWidth * wScalar;
+  let wScalar = map(avocado.y, 0, height, 0.25, 1);
+  let scaledWidth = avocado.fWidth * wScalar;
 
-  let img = fish.vx > 0 ? avoRight : avoLeft;
+  let img = avocado.vx > 0 ? avoRight : avoLeft;
 
   imageMode(CENTER);
-  image(img, fish.x, fish.y, scaledWidth, scaledHeight);
+  image(img, avocado.x, avocado.y, scaledWidth, scaledHeight);
   pop();
 }
 
 
 function mousePressed(){
-
-  for(let i = 0; i < school.length; i++){
-    let fish = school[i];
-    let d = dist(fish.x, fish.y, mouseX, mouseY);
-    if(d < (avoImgWidth + avoImgWidth) / 4){
-      school.splice(i, 1);
-    }
+  if(state == states.TITLE){
+    state = states.INIT;
   }
-
-  aniIndex = 0;
-  isEating = true;
+  else if(state == states.SIM){
+    for(let i = 0; i < swarm.length; i++){
+      let avocado = swarm[i];
+      let d = dist(avocado.x, avocado.y, mouseX, mouseY);
+      if(d < (avoImgWidth + avoImgWidth) / 3){
+        swarm.splice(i, 1);
+      }
+    }
+    aniIndex = 0;
+    isEating = true;
+  }
 }
