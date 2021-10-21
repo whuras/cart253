@@ -19,12 +19,26 @@ Evaluation:
 let school = [];
 let schoolSize = 10;
 
+let avoLeft;
+let avoRight;
+let imgWidth = 105;
+let imgHeight = 190;
+
+let state;
+let states = {
+  TITLE: "title",
+  INIT: "init",
+  SIM: "sim",
+  ENDUNO: "end1",
+  ENDDOSO: "end2"
+}
 
 /**
 Description of preload
 */
 function preload() {
-
+  avoLeft = loadImage("assets/images/avo_left.png");
+  avoRight = loadImage("assets/images/avo_right.png");
 }
 
 
@@ -34,9 +48,53 @@ Description of setup
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
+  state = states.TITLE;
+}
+
+/**
+Description of draw()
+*/
+function draw() {
+  background(color("#5C9EAD"));
+
+  if(state == states.TITLE){
+    title();
+  }
+  else if(state == states.INIT){
+    init();
+  }
+  else if(state == states.SIM){
+    sim();
+  }
+  else if(state == states.ENDUNO){
+
+  }
+  else if(state == states.ENDDOS){
+
+  }
+
+}
+
+
+function title(){
+  state = states.INIT;
+}
+
+
+function init(){
   for(let i = 0; i < schoolSize; i++){
     let fish = createFish(random(0, width), random(0, height));
     school.push(fish);
+  }
+
+  state = states.SIM;
+}
+
+
+function sim(){
+  for(let i = 0; i < school.length; i++){
+    moveFish(school[i]);
+    displayFish(school[i]);
   }
 }
 
@@ -45,24 +103,13 @@ function createFish(x, y){
   let fish = {
     x: x,
     y: y,
-    size: 50,
+    fWidth: imgWidth,
+    fHeight: imgHeight,
     vx: 0,
     vy: 0,
     speed: 2
   }
   return fish;
-}
-
-/**
-Description of draw()
-*/
-function draw() {
-  background(0);
-
-  for(let i = 0; i < school.length; i++){
-    moveFish(school[i]);
-    displayFish(school[i]);
-  }
 }
 
 // chooses whether a fish changes directions and moves it
@@ -86,9 +133,11 @@ function moveFish(fish){
 // displays the provided fish on the canvas
 function displayFish(fish){
   push();
-  fill(200, 100, 100);
-  noStroke();
-  ellipse(fish.x, fish.y, fish.size);
+  let img = fish.vx > 0 ? avoRight : avoLeft;
+  image(img, fish.x, fish.y);
+  //fill(200, 100, 100);
+  //noStroke();
+  //ellipse(fish.x, fish.y, fish.size);
   pop();
 }
 
