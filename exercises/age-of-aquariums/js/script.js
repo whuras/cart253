@@ -19,7 +19,7 @@ Evaluation:
 let school = [];
 let schoolSize = 10;
 
-let gameTimer = 3;
+let gameTimer = 10;
 let timer = 0;
 
 let avoLeft;
@@ -27,6 +27,9 @@ let avoRight;
 let avoImgWidth = 105;
 let avoImgHeight = 190;
 
+let dinoSleepImg;
+let dinoSleepImgWidth = 195;
+let dinoSleepImgHeight = 100;
 let dinoImgWidth = 263;
 let dinoImgHeight = 136;
 let dinoNomImgWidth = 187;
@@ -34,6 +37,7 @@ let dinoNomImgHeight = 190;
 let aniIndex = 0;
 let dinoAnimationFrames = [];
 let eatingAnimationFrames = [];
+
 
 let isEating = false;
 let eatTimer = 1;
@@ -71,6 +75,8 @@ function preload() {
 
   eatingAnimationFrames[0] = loadImage("assets/images/dinonom1.png");
   eatingAnimationFrames[1] = loadImage("assets/images/dinonom2.png");
+
+  dinoSleepImg = loadImage("assets/images/dinosleep.png");
 }
 
 
@@ -79,7 +85,7 @@ Description of setup
 */
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
+  noCursor();
   state = states.TITLE;
 }
 
@@ -99,10 +105,10 @@ function draw() {
     sim();
   }
   else if(state == states.ENDUNO){
-    endUno();
+    ending(eatingAnimationFrames[0], "Oops, the meteor crashed before the dinosaur could eat its fill! Looks like it died on an empty stomach :(", dinoNomImgWidth, dinoNomImgHeight);
   }
   else if(state == states.ENDDOS){
-
+    ending(dinoSleepImg, "Aww, the dinosaur is sleeping soundly with a full stomach. It didn't even notice the apocalypse :)", dinoSleepImgWidth, dinoSleepImgHeight);
   }
 }
 
@@ -231,7 +237,7 @@ function sim(){
     timer++;
   }
   else if(timer >= gameTimer){
-    state = states.ENDUNO;
+    state = school.length > 0 ? states.ENDUNO : states.ENDDUO;
   }
 
   // meteor animation
@@ -256,14 +262,14 @@ function sim(){
 }
 
 
-function endUno(){
+function ending(img, t, w, h){
   //let explosionInterval = 10;
   //let explosionTimer = 0;
 
   drawGround();
 
   push();
-  image(eatingAnimationFrames[0], 400, 400, dinoNomImgWidth * 2, dinoNomImgHeight * 2);
+  image(img, 400, 400, w * 2, h * 2);
   pop();
 
   let explosionX = map(timer, 0, gameTimer, 0, width);
@@ -296,7 +302,7 @@ function endUno(){
   rect(10, 10, 400, 250);
   fill(255);
   textSize(32);
-  text("Oops, the meteor crashed before the dinosaur could eat its fill! Looks like it died on an empty stomach :(", 15, 15, 400, 200);
+  text(t, 15, 15, 400, 200);
   textSize(16);
   text("Press F5 to restart.", 15, 200, 200, 20);
   pop();
@@ -345,14 +351,22 @@ function displayFish(fish){
   let scaledWidth = fish.fWidth * wScalar;
 
   let img = fish.vx > 0 ? avoRight : avoLeft;
+
+  imageMode(CENTER);
   image(img, fish.x, fish.y, scaledWidth, scaledHeight);
   pop();
 }
 
-// creates a fish at the mouse position
+
 function mousePressed(){
-  //let fish = createFish(mouseX, mouseY);
-  //school.push(fish);
+
+  for(let i = 0; i < school.length; i++){
+    let fish = school[i];
+    let d = dist(fish.x, fish.y, mouseX, mouseY);
+    if(d < (avoImgWidth + avoImgWidth) / 4){
+      school.splice(i, 1);
+    }
+  }
 
   aniIndex = 0;
   isEating = true;
