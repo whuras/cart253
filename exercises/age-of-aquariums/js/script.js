@@ -19,7 +19,7 @@ Evaluation:
 let school = [];
 let schoolSize = 10;
 
-let gameTimer = 10;
+let gameTimer = 3;
 let timer = 0;
 
 let avoLeft;
@@ -38,6 +38,9 @@ let eatingAnimationFrames = [];
 let isEating = false;
 let eatTimer = 1;
 let eatingTimer = 0;
+
+let explosionInterval = 3;
+let explosionTimer = 0;
 
 let prevX = 0;
 let flip = false;
@@ -96,7 +99,7 @@ function draw() {
     sim();
   }
   else if(state == states.ENDUNO){
-
+    endUno();
   }
   else if(state == states.ENDDOS){
 
@@ -223,14 +226,12 @@ function init(){
 
 
 function sim(){
-
-
   // game timer
   if(frameCount % 60 == 0 && timer < gameTimer){
     timer++;
   }
   else if(timer >= gameTimer){
-    timer = 0;
+    state = states.ENDUNO;
   }
 
   // meteor animation
@@ -252,6 +253,53 @@ function sim(){
     moveFish(school[i]);
     displayFish(school[i]);
   }
+}
+
+
+function endUno(){
+  //let explosionInterval = 10;
+  //let explosionTimer = 0;
+
+  drawGround();
+
+  push();
+  image(eatingAnimationFrames[0], 400, 400, dinoNomImgWidth * 2, dinoNomImgHeight * 2);
+  pop();
+
+  let explosionX = map(timer, 0, gameTimer, 0, width);
+  if(frameCount % 60 == 0 && explosionTimer < explosionInterval){
+    explosionTimer++;
+  }
+  else if(explosionTimer >= explosionInterval){
+    explosionTimer = 0;
+  }
+
+  push();
+  noStroke();
+  ellipseMode(CENTER);
+
+  fill(232,49,81,50);
+  ellipse(explosionX, height/5, width * (explosionTimer + 1), width * (explosionTimer + 1));
+
+  fill(232,49,81,100);
+  ellipse(explosionX, height/5, width * (explosionTimer + 1) / 2, width * (explosionTimer + 1) / 2);
+
+  fill(232,49,81,200);
+  ellipse(explosionX, height/5, width * (explosionTimer + 1) / 3, width * (explosionTimer + 1) / 3);
+
+  fill(232,49,81,255);
+  ellipse(explosionX, height/5, width * (explosionTimer + 1) / 4, width * (explosionTimer + 1) / 4);
+  pop();
+
+  push();
+  fill(0, 0, 0, 100);
+  rect(10, 10, 400, 250);
+  fill(255);
+  textSize(32);
+  text("Oops, the meteor crashed before the dinosaur could eat its fill! Looks like it died on an empty stomach :(", 15, 15, 400, 200);
+  textSize(16);
+  text("Press F5 to restart.", 15, 200, 200, 20);
+  pop();
 }
 
 
