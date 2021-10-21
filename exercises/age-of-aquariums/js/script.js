@@ -19,6 +19,9 @@ Evaluation:
 let swarm = [];
 let dinoAnimationFrames = [];
 let eatingAnimationFrames = [];
+let boulderImages = [];
+let boulderXPos = [];
+let boulderYPos = [];
 
 let swarmSize = 10;
 
@@ -77,6 +80,10 @@ function preload() {
   for(let i = 0; i < 2; i++){
     eatingAnimationFrames[i] = loadImage("assets/images/dinonom" + (i + 1) + ".png");
   }
+
+  for(let i = 0; i < 4; i++){
+    boulderImages[i] = loadImage("assets/images/boulder" + (i + 1) + ".png");
+  }
 }
 
 
@@ -87,6 +94,12 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   noCursor();
   state = states.TITLE;
+
+  // set boulder positions (cannot do in pre-load as requires width/height)
+  for(let i = 0; i < boulderImages.length; i++){
+    boulderXPos[i] = random(i *  width / boulderImages.length, (i + 1) * width / boulderImages.length);
+    boulderYPos[i] = random(height/5, height - 100);
+  }
 }
 
 /**
@@ -116,7 +129,9 @@ function draw() {
   }
 }
 
-
+/**
+Draw meteor that represents the game timer
+*/
 function drawMeteor(){
   let x = map(timer, 0, gameTimer, 0, width);
   let y = 0;
@@ -133,6 +148,9 @@ function drawMeteor(){
 }
 
 
+/**
+Draw ground area
+*/
 function drawGround(){
   push();
   rectMode(CENTER);
@@ -140,12 +158,32 @@ function drawGround(){
   fill(color("#8C7051"));
   rect(width/2, height/5 * 3, width, height/5 * 4);
   pop();
+  drawBoulders();
 }
 
 
+/**
+Draw boulders to make more use of random
+*/
+function drawBoulders(){
+  push();
+  imageMode(CENTER);
+  for(let i = 0; i < 4; i++){
+    let img = boulderImages[i];
+    image(img, boulderXPos[i], boulderYPos[i]);
+  }
+  pop();
+}
+
+
+/**
+Display the dino eating animation
+*/
 function eatAnimation(){
+  // constrain to ground area
   let yConstrained = constrain(mouseY, height/5, height);
 
+  // scale based on perceived distance
   let hScalar = map(mouseY, 0, height, 0.25, 1);
   let scaledHeight = dinoNomImgHeight * hScalar;
 
@@ -176,6 +214,7 @@ function eatAnimation(){
     image(eatingAnimationFrames[floor(aniIndex/5)], mouseX, yConstrained, scaledWidth, scaledHeight);
   }
 
+  // animation indices
   aniIndex++;
   if (aniIndex > 9){
     aniIndex = 0;
@@ -184,9 +223,14 @@ function eatAnimation(){
 }
 
 
+/**
+Display the dino running animation
+*/
 function dinoAnimation(){
+    // constrain to ground area
   let yConstrained = constrain(mouseY, height/5, height);
 
+  // scale based on perceived distance
   let hScalar = map(mouseY, 0, height, 0.25, 1);
   let scaledHeight = dinoImgHeight * hScalar;
 
@@ -208,6 +252,7 @@ function dinoAnimation(){
     image(dinoAnimationFrames[floor(aniIndex/5)], mouseX, yConstrained, scaledWidth, scaledHeight);
   }
 
+  // animation indices
   aniIndex++;
   if (aniIndex > 24){
     aniIndex = 0;
@@ -216,6 +261,9 @@ function dinoAnimation(){
 }
 
 
+/**
+Title screen
+*/
 function title(){
   push();
   background(0, 104, 56);
@@ -245,6 +293,9 @@ function init(){
 }
 
 
+/**
+Simulation state
+*/
 function sim(){
   // game timer
   if(frameCount % 60 == 0 && timer < gameTimer){
@@ -272,6 +323,9 @@ function sim(){
 }
 
 
+/**
+Ending screen
+*/
 function ending(img, t, w, h){
   drawGround();
 
@@ -311,6 +365,9 @@ function ending(img, t, w, h){
 }
 
 
+/**
+Create avocado objects
+*/
 function createAvocado(x, y){
   let avocado = {
     x: x,
@@ -360,6 +417,9 @@ function displayAvocado(avocado){
 }
 
 
+/**
+handles mouse input
+*/
 function mousePressed(){
   if(state == states.TITLE){
     state = states.INIT;
