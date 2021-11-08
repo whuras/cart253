@@ -7,24 +7,32 @@ Brief:
 - Ideally produce a prototype that explores how you will use sound in your final project
 
 Explanation:
-- Background music
-- Tone when the mouse is close to various objects (volume dependent on dist)
-- Sound effect when something happens
+- Background music toggle with button
+- Chord toggle with button
+- Different chords played when mouse in on various target circles
+- Velocity of target chords changes based on mouse distance (mapped 0 to diameter)
+- Sound effect plays when the target is clicked
 
 **************************************************/
 
 "use strict";
 
-let synth;
-
 let bgMusic;
-let musicIsPlaying = false;
+let playMusic = false;
 
 let soundEffect;
 
-let target;
-let targetSoundIsPlaying = false;
-let notes = ["C4", "E4", "G4", "A4"]; // to all be played at once
+let targets = [];
+let targetActiveColor = "#fff4d6";
+let targetInactiveColor = "#7C0D0E";
+let playTargetNotes = false;
+
+let notes1 = ["A4", "C4", "E4"]; // to all be played at once
+let notes2 = ["B4", "D4", "F4"]; // to all be played at once
+let notes3 = ["C4", "E4", "G4"]; // to all be played at once
+let notes4 = ["D4", "F4", "A4"]; // to all be played at once
+let notes5 = ["E4", "G4", "B4"]; // to all be played at once
+
 
 /**
 Preload music files
@@ -39,12 +47,14 @@ function preload() {
 Description of setup
 */
 function setup() {
-  createCanvas(800, 600);
-
-  synth = new p5.PolySynth();
+  createCanvas(600, 600);
 
   // create target which hosts notes and sound effects
-  target = new Target(100, 100, 100, "#fff4d6", notes, soundEffect)
+  append(targets, new Target(100 * 1, 100 * 1, 100, targetActiveColor, targetInactiveColor, notes1, soundEffect));
+  append(targets, new Target(100 * 3, 100 * 3, 100, targetActiveColor, targetInactiveColor, notes2, soundEffect));
+  append(targets, new Target(100 * 5, 100 * 5, 100, targetActiveColor, targetInactiveColor, notes3, soundEffect));
+  append(targets, new Target(100 * 5, 100 * 1, 100, targetActiveColor, targetInactiveColor, notes4, soundEffect));
+  append(targets, new Target(100 * 1, 100 * 5, 100, targetActiveColor, targetInactiveColor, notes5, soundEffect));
 
   // create buttons for toggling music and sound
   var buttonMusic = createButton("Toggle Music");
@@ -63,21 +73,22 @@ Description of draw()
 function draw() {
   background("#eef1ef");
 
-  // Music
-  if(musicIsPlaying){
-    bgMusic.loop();
-  }else{
-    bgMusic.stop();
-  }
-
   // Display Objects
-  target.display();
-
-  // Play target sounds
-  if(targetSoundIsPlaying){
-    target.playNotes(synth);
+  for(let i = 0; i < targets.length; i++){
+    targets[i].display();
   }
 
+  // Play/stop target sounds
+  if(playTargetNotes){
+    for(let i = 0; i < targets.length; i++){
+      targets[i].playNotes();
+    }
+  }
+  else{
+    for(let i = 0; i < targets.length; i++){
+      targets[i].stopNotes();
+    }
+  }
 }
 
 
@@ -86,9 +97,20 @@ When mouse is pressed, if the mouse is within the target it will play
 its sound effect.
 */
 function mousePressed(){
-  let d = dist(mouseX, mouseY, target.x, target.y);
-  if(d < target.diameter / 2){
-    target.playSoundEffect();
+
+  // Music
+  if(playMusic){
+    bgMusic.loop();
+  }else{
+    bgMusic.stop();
+  }
+
+  // Target On-Click Sound Effects
+  for(let i = 0; i < targets.length; i++){
+    let d = dist(mouseX, mouseY, targets[i].x, targets[i].y);
+    if(d < targets[i].diameter / 2){
+      targets[i].playSoundEffect();
+    }
   }
 }
 
@@ -97,7 +119,7 @@ function mousePressed(){
 Toggles the music on and off
 */
 function toggleMusic(){
-  musicIsPlaying = !musicIsPlaying;
+  playMusic = !playMusic;
 }
 
 
@@ -105,5 +127,5 @@ function toggleMusic(){
 Toggles the sound (velocity based on distance of mouse to target) on and off
 */
 function toggleSound(){
-  targetSoundIsPlaying = !targetSoundIsPlaying;
+  playTargetNotes = !playTargetNotes;
 }
