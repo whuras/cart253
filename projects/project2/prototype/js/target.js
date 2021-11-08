@@ -23,6 +23,7 @@ class Target{
     this.notes = notes;
     this.soundEffect = soundEffect;
     this.synths = [];
+    this.isActive = true;
 
     // Creates a synth for each note passed
     for(let i = 0; i < notes.length; i++){
@@ -32,40 +33,43 @@ class Target{
 
   // Visual display of target
   display(){
-    let d = dist(this.x, this.y, mouseX, mouseY);
+    if(this.isActive){
+      let d = dist(this.x, this.y, mouseX, mouseY);
 
-    push();
-    noStroke();
+      push();
+      noStroke();
 
-    if(d <= this.maxDiameter){ // pulses if mouse is within maxDistance
-      fill(this.activeColor);
-      this.diameter = sin(this.theta) * this.maxDiameter;
-      circle(this.x, this.y, this.diameter);
-      this.theta += this.thetaIncrement;
+      if(d <= this.maxDiameter){ // pulses if mouse is within maxDistance
+        fill(this.activeColor);
+        this.diameter = sin(this.theta) * this.maxDiameter;
+        circle(this.x, this.y, this.diameter);
+        this.theta += this.thetaIncrement;
+      }
+      else{ //
+        fill(this.inactiveColor);
+        circle(this.x, this.y, this.inactiveDiameter);
+        this.theta = 0;
+        this.diameter = this.inactiveDiameter;
+      }
+
+      pop();
     }
-    else{ //
-      fill(this.inactiveColor);
-      circle(this.x, this.y, this.inactiveDiameter);
-      this.theta = 0;
-      this.diameter = this.inactiveDiameter;
-    }
-
-    pop();
   }
 
   // Plays notes if mouse is within the maxDimater
   playNotes(){
+    if(this.isActive){
+      let d = dist(this.x, this.y, mouseX, mouseY);
+      let velocity = map(d, 0, this.maxDiameter, 0.2, 0);
 
-    let d = dist(this.x, this.y, mouseX, mouseY);
-    let velocity = map(d, 0, this.maxDiameter, 0.2, 0);
-
-    if(d <= this.maxDiameter){
-      for(let i = 0; i < this.synths.length; i++){
-        this.synths[i].noteAttack(this.notes[i], velocity, 0);
+      if(d <= this.maxDiameter){
+        for(let i = 0; i < this.synths.length; i++){
+          this.synths[i].noteAttack(this.notes[i], velocity, 0);
+        }
       }
-    }
-    else{
-      this.stopNotes();
+      else{
+        this.stopNotes();
+      }
     }
   }
 
@@ -78,7 +82,9 @@ class Target{
 
   // Plays sound effect
   playSoundEffect(){
-    this.soundEffect.play();
+    if(this.isActive){
+      this.soundEffect.play();
+    }
   }
 
 }

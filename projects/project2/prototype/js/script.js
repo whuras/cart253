@@ -14,6 +14,9 @@ Explanation:
 "use strict";
 
 let bgColor = "#eef1ef";
+let groundColor = "#BA5624"
+
+let groundHeight = 50;
 
 let bgMusic;
 let playMusic = false;
@@ -21,6 +24,7 @@ let playMusic = false;
 let soundEffect;
 
 let targets = [];
+let targetDiameter = 50;
 let targetActiveColor = "#fff4d6";
 let targetInactiveColor = "#5e6572";
 let playTargetNotes = false;
@@ -31,6 +35,7 @@ let notes = ["A4", "C4", "E4"]; // to all be played at once
 Description of preload
 */
 function preload() {
+  // Comment out for speedy reloads during testing
   //bgMusic = loadSound("assets/sounds/Crowander - Underwater.mp3");
   //soundEffect = loadSound("assets/sounds/whoosh.wav");
 }
@@ -43,7 +48,16 @@ function setup() {
   createCanvas(600, 600);
 
   // create initial target which hosts notes and sound effects
-  append(targets, new Target(width / 2, height  - 100, 50, targetActiveColor, targetInactiveColor, notes, soundEffect));
+  //Target constructor(x, y, maxDiameter, activeColor, inactiveColor, notes, soundEffect);
+  append(targets, new Target(
+    width / 2,
+    height  - (groundHeight + targetDiameter / 8 + 1),
+    targetDiameter,
+    targetActiveColor,
+    targetInactiveColor,
+    notes,
+    soundEffect
+    ));
 
   // create buttons for toggling music and sound - more for my own sanity
   var buttonMusic = createButton("Toggle Music");
@@ -61,6 +75,7 @@ Description of draw()
 */
 function draw() {
   background(bgColor);
+  displayGround();
 
   // Display Objects
   for(let i = 0; i < targets.length; i++){
@@ -93,6 +108,19 @@ function mousePressed(){
       targets[i].playSoundEffect();
     }
   }
+}
+
+
+/**
+Displays Ground
+*/
+function displayGround(){
+  push();
+  noStroke();
+  fill(groundColor);
+  rectMode(CENTER);
+  rect(width/2, height - groundHeight / 2, width, groundHeight);
+  pop();
 }
 
 
