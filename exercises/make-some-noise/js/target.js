@@ -1,5 +1,5 @@
 /**************************************************
-Exercise: Age of Aquariums
+Exercise: Make Some Noise
 Wayne Huras ID 40074423
 
 Explanation: A target is a circle which is displayed on the screen and plays
@@ -33,7 +33,7 @@ class Target{
   // Visual display of target
   display(){
     let d = dist(this.x, this.y, mouseX, mouseY);
-    
+
     push();
     noStroke();
 

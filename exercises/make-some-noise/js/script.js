@@ -1,5 +1,5 @@
 /**************************************************
-Exercise: Age of Aquariums
+Exercise: Make Some Noise
 Wayne Huras ID 40074423
 
 Brief:
@@ -24,7 +24,7 @@ let soundEffect;
 
 let targets = [];
 let targetActiveColor = "#fff4d6";
-let targetInactiveColor = "#7C0D0E";
+let targetInactiveColor = "#5e6572";
 let playTargetNotes = false;
 
 let notes1 = ["A4", "C4", "E4"]; // to all be played at once
@@ -97,14 +97,6 @@ When mouse is pressed, if the mouse is within the target it will play
 its sound effect.
 */
 function mousePressed(){
-
-  // Music
-  if(playMusic){
-    bgMusic.loop();
-  }else{
-    bgMusic.stop();
-  }
-
   // Target On-Click Sound Effects
   for(let i = 0; i < targets.length; i++){
     let d = dist(mouseX, mouseY, targets[i].x, targets[i].y);
@@ -119,6 +111,11 @@ function mousePressed(){
 Toggles the music on and off
 */
 function toggleMusic(){
+  if(playMusic){
+    bgMusic.loop();
+  }else{
+    bgMusic.stop();
+  }
   playMusic = !playMusic;
 }
 
