@@ -28,8 +28,10 @@ let targetDiameter = 50;
 let targetActiveColor = "#fff4d6";
 let targetInactiveColor = "#5e6572";
 let playTargetNotes = false;
-
 let notes = ["A4", "C4", "E4"]; // to all be played at once
+
+let vines =[];
+let activeVine;
 
 /**
 Description of preload
@@ -57,7 +59,28 @@ function setup() {
     targetInactiveColor,
     notes,
     soundEffect
-    ));
+  ));
+  targets[0].isBase = true;
+
+  append(targets, new Target(
+    width / 3 * 1,
+    height  - (groundHeight + targetDiameter / 8 + 100),
+    targetDiameter,
+    targetActiveColor,
+    targetInactiveColor,
+    notes,
+    soundEffect
+  ));
+
+  append(targets, new Target(
+    width / 3 * 2,
+    height  - (groundHeight + targetDiameter / 8 + 100),
+    targetDiameter,
+    targetActiveColor,
+    targetInactiveColor,
+    notes,
+    soundEffect
+  ));
 
   // create buttons for toggling music and sound - more for my own sanity
   var buttonMusic = createButton("Toggle Music");
@@ -81,11 +104,16 @@ function draw() {
   for(let i = 0; i < targets.length; i++){
     targets[i].display();
   }
+  for(let i = 0; i < vines.length; i++){
+    vines[i].display();
+  }
 
   // Play/stop target sounds
   if(playTargetNotes){
     for(let i = 0; i < targets.length; i++){
-      targets[i].playNotes();
+      if(targets[i].isActive){
+        targets[i].playNotes();
+      }
     }
   }
   else{
@@ -101,11 +129,26 @@ When mouse is pressed, if the mouse is within the target it will play
 its sound effect.
 */
 function mousePressed(){
-  // Target On-Click Sound Effects
+
+
   for(let i = 0; i < targets.length; i++){
     let d = dist(mouseX, mouseY, targets[i].x, targets[i].y);
-    if(d < targets[i].diameter / 2){
-      targets[i].playSoundEffect();
+
+    // if the mouse is over the target, and it is active..
+    if(d < targets[i].diameter / 2 && targets[i].isActive){
+
+      // if the target is the base, then we start the first vine, growing from the target
+      if(targets[i].isBase && targets[i].isActive){
+        activeVine = new Vine(targets[i].x, targets[i].y, 10, 26);
+        append(vines, activeVine);
+      }
+      // else if we have a valid target, stop moving the active vine
+      else if(targets[i].isActive && activeVine != undefined){
+        activeVine.isActive = false;
+      }
+
+      targets[i].isActive = false;
+      //targets[i].playSoundEffect();
     }
   }
 }

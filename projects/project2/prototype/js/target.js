@@ -24,6 +24,7 @@ class Target{
     this.soundEffect = soundEffect;
     this.synths = [];
     this.isActive = true;
+    this.isBase = false;
 
     // Creates a synth for each note passed
     for(let i = 0; i < notes.length; i++){
@@ -58,18 +59,16 @@ class Target{
 
   // Plays notes if mouse is within the maxDimater
   playNotes(){
-    if(this.isActive){
-      let d = dist(this.x, this.y, mouseX, mouseY);
-      let velocity = map(d, 0, this.maxDiameter, 0.2, 0);
+    let d = dist(this.x, this.y, mouseX, mouseY);
+    let velocity = map(d, 0, this.maxDiameter, 0.2, 0);
 
-      if(d <= this.maxDiameter){
-        for(let i = 0; i < this.synths.length; i++){
-          this.synths[i].noteAttack(this.notes[i], velocity, 0);
-        }
+    if(d <= this.maxDiameter && this.isActive){
+      for(let i = 0; i < this.synths.length; i++){
+        this.synths[i].noteAttack(this.notes[i], velocity, 0);
       }
-      else{
-        this.stopNotes();
-      }
+    }
+    else{
+      this.stopNotes();
     }
   }
 
