@@ -8,6 +8,10 @@ Brief: Part 1 - Proposal (see pdf) and Prototype
 - Roughly the scale of one of the exercises
 
 Explanation:
+Begin the program and click on the circle at the very bottom of the screen.
+With a vine following your cursor, click on another circle which is within reach of the vine.
+Once the vine is anchored to the circle, select a segment of any vine to grow another from that location.
+Again, anchor the new vine to a circle. Repeat to grow a gnarly tree.
 
 **************************************************/
 
@@ -24,6 +28,7 @@ let playMusic = false;
 let soundEffect;
 
 let targets = [];
+let numTargets = 10; // even number, max 10 for testing
 let targetDiameter = 50;
 let targetActiveColor = "#fff4d6";
 let targetInactiveColor = "#5e6572";
@@ -60,27 +65,33 @@ function setup() {
     notes,
     soundEffect
   ));
-  targets[0].isBase = true;
 
-  append(targets, new Target(
-    width / 3 * 1,
-    height  - (groundHeight + targetDiameter / 8 + 100),
-    targetDiameter,
-    targetActiveColor,
-    targetInactiveColor,
-    notes,
-    soundEffect
-  ));
+  for(let i = 0; i < numTargets / 2; i++){
+    append(targets, new Target(
+      width / 3 * 1,
+      height  - (groundHeight + targetDiameter / 8 + 100 + 100 * i),
+      targetDiameter,
+      targetActiveColor,
+      targetInactiveColor,
+      notes,
+      soundEffect
+    ));
+  }
 
-  append(targets, new Target(
-    width / 3 * 2,
-    height  - (groundHeight + targetDiameter / 8 + 100),
-    targetDiameter,
-    targetActiveColor,
-    targetInactiveColor,
-    notes,
-    soundEffect
-  ));
+  for(let i = 0; i < numTargets / 2; i++){
+    append(targets, new Target(
+      width / 3 * 2,
+      height  - (groundHeight + targetDiameter / 8 + 100 + 100 * i),
+      targetDiameter,
+      targetActiveColor,
+      targetInactiveColor,
+      notes,
+      soundEffect
+    ));
+  }
+
+
+
 
   // create buttons for toggling music and sound - more for my own sanity
   var buttonMusic = createButton("Toggle Music");
@@ -111,9 +122,7 @@ function draw() {
   // Play/stop target sounds
   if(playTargetNotes){
     for(let i = 0; i < targets.length; i++){
-      if(targets[i].isActive){
-        targets[i].playNotes();
-      }
+      targets[i].playNotes();
     }
   }
   else{
@@ -130,25 +139,44 @@ its sound effect.
 */
 function mousePressed(){
 
-
-  for(let i = 0; i < targets.length; i++){
-    let d = dist(mouseX, mouseY, targets[i].x, targets[i].y);
-
-    // if the mouse is over the target, and it is active..
-    if(d < targets[i].diameter / 2 && targets[i].isActive){
-
-      // if the target is the base, then we start the first vine, growing from the target
-      if(targets[i].isBase && targets[i].isActive){
-        activeVine = new Vine(targets[i].x, targets[i].y, 10, 26);
-        append(vines, activeVine);
+  if(activeVine == undefined){
+    // if the mouse is over the active base [0] target then grow starting vine
+    let dBase = dist(mouseX, mouseY, targets[0].x, targets[0].y);
+    if(targets[0].isActive && dBase < targets[0].diameter / 2){
+      activeVine = new Vine(targets[0].x, targets[0].y, 10, 26);
+      append(vines, activeVine);
+      targets[0].isActive = false;
+    }
+    // we do no have an active vine and we are not growing the base
+    else{
+      // Check vine intersections and grow from an intersection if valid
+      for(let i = 0; i < vines.length; i++){
+        for(let j = 0; j < vines[i].x.length; j++){
+          let dVine = dist(mouseX, mouseY, vines[i].x[j], vines[i].y[j]);
+          if(dVine < 5){
+            activeVine = new Vine(vines[i].x[j], vines[i].y[j], 10, 26);
+            append(vines, activeVine);
+            break;
+          }
+        }
+        // Stop looping if we've created a new vine
+        if(activeVine != undefined){
+           break;
+        }
       }
-      // else if we have a valid target, stop moving the active vine
-      else if(targets[i].isActive && activeVine != undefined){
+    }
+  }
+  // there is an activeVine
+  else{
+    // Check if we're on an active target, if so anchor vine
+    for(let i = 0; i < targets.length; i++){
+      let dMouse = dist(targets[i].x, targets[i].y, mouseX, mouseY);
+      let dVineToTarget = dist(targets[i].x, targets[i].y, activeVine.x[0], activeVine.y[0]);
+      if(targets[i].isActive && dMouse < targets[i].maxDiameter / 2 && dVineToTarget < activeVine.segLength * 2){
         activeVine.isActive = false;
+        targets[i].isActive = false;
+        activeVine = undefined;
       }
-
-      targets[i].isActive = false;
-      //targets[i].playSoundEffect();
     }
   }
 }

@@ -3,8 +3,8 @@ Exercise: Make Some Noise
 Wayne Huras ID 40074423
 
 Base Code Credit: https://p5js.org/examples/interaction-reach-2.html
-Explanation:
-
+Explanation: Logic to calculate vine segment locations, angles, and length.
+Base code is credited to the example found in p5js.org.
 **************************************************/
 
 class Vine{

@@ -24,7 +24,6 @@ class Target{
     this.soundEffect = soundEffect;
     this.synths = [];
     this.isActive = true;
-    this.isBase = false;
 
     // Creates a synth for each note passed
     for(let i = 0; i < notes.length; i++){
