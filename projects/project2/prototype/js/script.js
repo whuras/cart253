@@ -30,6 +30,7 @@ let playMusic = true;
 let soundEffect;
 
 let targets = [];
+let playingTargets = [];
 let numTargets = 10; // even number, max 10 for testing
 let targetDiameter = 50;
 let targetActiveColor = "#fff4d6";
@@ -43,7 +44,17 @@ let notes4 = ["D4", "F4", "A4"]; // to all be played at once
 let notes5 = ["E4", "G4", "B4"]; // to all be played at once
 let notes = [notes1, notes2, notes3, notes4, notes5];
 
-let vines =[];
+let noteA = ["A4"];
+let noteB = ["B4"];
+let noteC = ["C4"];
+let noteD = ["D4"];
+let noteE = ["E4"];
+let noteF = ["F4"];
+let noteG = ["G4"];
+let singleNotes = [noteA, noteB, noteC, noteD, noteE, noteF, noteG];
+let maxNotes = 3;
+
+let vines = [];
 let activeVine;
 
 /**
@@ -70,7 +81,7 @@ function setup() {
     targetDiameter,
     targetActiveColor,
     targetInactiveColor,
-    random(notes),
+    random(singleNotes),
     soundEffect,
     spiralImage
   ));
@@ -82,7 +93,7 @@ function setup() {
       targetDiameter,
       targetActiveColor,
       targetInactiveColor,
-      random(notes),
+      random(singleNotes),
       soundEffect,
       spiralImage
     ));
@@ -95,7 +106,7 @@ function setup() {
       targetDiameter,
       targetActiveColor,
       targetInactiveColor,
-      random(notes),
+      random(singleNotes),
       soundEffect,
       spiralImage
     ));
@@ -160,6 +171,7 @@ function mousePressed(){
       activeVine = new Vine(targets[0].x, targets[0].y, 10, 26);
       append(vines, activeVine);
       targets[0].isActive = false;
+      addPlayNotes(targets[0]);
     }
     // we do no have an active vine and we are not growing the base
     else{
@@ -185,14 +197,20 @@ function mousePressed(){
     // Check if we're on an active target, if so anchor vine
     for(let i = 0; i < targets.length; i++){
       let dMouse = dist(targets[i].x, targets[i].y, mouseX, mouseY);
-      let dVineToTarget = dist(
-        targets[i].x,
-        targets[i].y,
-        activeVine.x[0],
-        activeVine.y[0]);
+
+      let dVineToTarget = 1;
+      if(activeVine != undefined){
+        dVineToTarget = dist(
+          targets[i].x,
+          targets[i].y,
+          activeVine.x[0],
+          activeVine.y[0]);
+      }
+
       if(targets[i].isActive && dMouse < targets[i].maxDiameter / 2 && dVineToTarget < activeVine.segLength * 2){
         activeVine.isActive = false;
         targets[i].isActive = false;
+        addPlayNotes(targets[i]);
         activeVine = undefined;
       }
     }
@@ -210,6 +228,22 @@ function displayGround(){
   rectMode(CENTER);
   rect(width/2, height - groundHeight / 2, width, groundHeight);
   pop();
+}
+
+function addPlayNotes(newPlayer){
+
+  newPlayer.playNote = true;
+
+  if(playingTargets.length < maxNotes){
+    append(playingTargets, newPlayer);
+  }
+  else{
+    playingTargets[0].playNote = false;
+    for(let i = 1; i < playingTargets.length; i++){
+      playingTargets[i - 1] = playingTargets[i];
+    }
+    playingTargets[playingTargets.length - 1] = newPlayer;
+  }
 }
 
 
