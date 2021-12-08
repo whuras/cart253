@@ -22,6 +22,8 @@ let groundColor = "#BA5624"
 
 let groundHeight = 50;
 
+let spiralImage;
+
 let bgMusic;
 let playMusic = true;
 
@@ -50,6 +52,7 @@ Description of preload
 function preload() {
   bgMusic = loadSound("assets/sounds/Crowander - Underwater.mp3");
   soundEffect = loadSound("assets/sounds/whoosh.wav");
+  spiralImage = loadImage("assets/images/spiral.png")
 }
 
 
@@ -68,7 +71,8 @@ function setup() {
     targetActiveColor,
     targetInactiveColor,
     random(notes),
-    soundEffect
+    soundEffect,
+    spiralImage
   ));
 
   for(let i = 0; i < numTargets / 2; i++){
@@ -79,7 +83,8 @@ function setup() {
       targetActiveColor,
       targetInactiveColor,
       random(notes),
-      soundEffect
+      soundEffect,
+      spiralImage
     ));
   }
 
@@ -91,7 +96,8 @@ function setup() {
       targetActiveColor,
       targetInactiveColor,
       random(notes),
-      soundEffect
+      soundEffect,
+      spiralImage
     ));
   }
 
@@ -117,6 +123,9 @@ function draw() {
   displayGround();
 
   // Display Objects
+  for(let i = targets.length - 1; i >= 0; i--){
+    targets[i].displaySpirals();
+  }
   for(let i = 0; i < targets.length; i++){
     targets[i].display();
   }
@@ -176,7 +185,11 @@ function mousePressed(){
     // Check if we're on an active target, if so anchor vine
     for(let i = 0; i < targets.length; i++){
       let dMouse = dist(targets[i].x, targets[i].y, mouseX, mouseY);
-      let dVineToTarget = dist(targets[i].x, targets[i].y, activeVine.x[0], activeVine.y[0]);
+      let dVineToTarget = dist(
+        targets[i].x,
+        targets[i].y,
+        activeVine.x[0],
+        activeVine.y[0]);
       if(targets[i].isActive && dMouse < targets[i].maxDiameter / 2 && dVineToTarget < activeVine.segLength * 2){
         activeVine.isActive = false;
         targets[i].isActive = false;

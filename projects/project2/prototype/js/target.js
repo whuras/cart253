@@ -10,7 +10,7 @@ sound effect when clicked.
 
 class Target{
   // Target constructor
-  constructor(x, y, maxDiameter, activeColor, inactiveColor, notes, soundEffect){
+  constructor(x, y, maxDiameter, activeColor, inactiveColor, notes, soundEffect, spiralImage){
     this.x = x;
     this.y = y;
     this.maxDiameter = maxDiameter;
@@ -24,6 +24,7 @@ class Target{
     this.soundEffect = soundEffect;
     this.synths = [];
     this.isActive = true;
+    this.spiralImage = spiralImage;
 
     // Creates a synth for each note passed
     for(let i = 0; i < notes.length; i++){
@@ -52,6 +53,16 @@ class Target{
         this.diameter = this.inactiveDiameter;
       }
 
+      pop();
+    }
+  }
+
+  // Separate display function so we can make them all in the background
+  displaySpirals(){
+    if(!this.isActive){
+      push();
+      imageMode(CENTER);
+      image(this.spiralImage, this.x, this.y);
       pop();
     }
   }

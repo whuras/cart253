@@ -10,3 +10,4 @@ Instructions:
 
 Credits:
 - Pulse code: https://editor.p5js.org/dansakamoto/sketches/H1ICcXXtm
+- Background: https://m.vk.com/club_paper_dolls
