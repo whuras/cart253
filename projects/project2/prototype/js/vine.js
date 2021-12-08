@@ -8,7 +8,7 @@ Base code is credited to the example found in p5js.org.
 **************************************************/
 
 class Vine{
-  constructor(baseXPos, baseYPos, numSegments, segLength){
+  constructor(baseXPos, baseYPos, numSegments, segLength, strokeColor){
     this.numSegments = numSegments;
     this.x = [];
     this.y = [];
@@ -17,6 +17,8 @@ class Vine{
     this.targetX;
     this.targetY;
     this.isActive = true;
+    this.strokeColor = strokeColor;
+    this.strokeColor.setAlpha(192);
 
     for(let i = 0; i < this.numSegments; i++){
       this.x[i] = 0;
@@ -33,7 +35,7 @@ class Vine{
     push();
 
     strokeWeight(20);
-    stroke(0, 128);
+    stroke(this.strokeColor);
     if(this.isActive){
       this.reachSegment(0, mouseX, mouseY);
       for(let i = 0; i < this.numSegments; i++){

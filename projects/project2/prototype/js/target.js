@@ -10,7 +10,7 @@ sound effect when clicked.
 
 class Target{
   // Target constructor
-  constructor(x, y, maxDiameter, activeColor, inactiveColor, notes, soundEffect, spiralImage){
+  constructor(x, y, maxDiameter, activeColor, inactiveColor, note, soundEffect){
     this.x = x;
     this.y = y;
     this.maxDiameter = maxDiameter;
@@ -20,32 +20,37 @@ class Target{
     this.thetaIncrement = 0.02; // used for pulsing display
     this.activeColor = activeColor;
     this.inactiveColor = inactiveColor;
-    this.notes = notes;
+    this.note = note;
     this.soundEffect = soundEffect;
-    this.synths = [];
+    this.synths = new p5.PolySynth();
     this.isActive = true;
     this.spiralImage = spiralImage;
     this.playNote = false;
 
-    // Creates a synth for each note passed
-    for(let i = 0; i < notes.length; i++){
-      append(this.synths, new p5.PolySynth());
-    }
+    this.spiralWidth = 203;
+    this.spiralHeight = 196;
+    this.spiralScale = 0;
+    this.spiralMaxScale = 1;
   }
 
   // Visual display of target
   display(){
     if(this.isActive){
       let d = dist(this.x, this.y, mouseX, mouseY);
-
       push();
       noStroke();
 
       if(d <= this.maxDiameter){ // pulses if mouse is within maxDistance
+        vineColor = this.activeColor;
         fill(this.activeColor);
         this.diameter = sin(this.theta) * this.maxDiameter;
         circle(this.x, this.y, this.diameter);
         this.theta += this.thetaIncrement;
+
+        fill(bgColor);
+        textSize(32);
+        textAlign(CENTER);
+        text(this.note.toString().charAt(0), this.x, this.y + 10);
       }
       else{ //
         fill(this.inactiveColor);
@@ -53,7 +58,6 @@ class Target{
         this.theta = 0;
         this.diameter = this.inactiveDiameter;
       }
-
       pop();
     }
   }
@@ -62,8 +66,13 @@ class Target{
   displaySpirals(){
     if(!this.isActive){
       push();
+
+      if(this.spiralScale < this.spiralMaxScale)
+        this.spiralScale += 0.01;
+
       imageMode(CENTER);
-      image(this.spiralImage, this.x, this.y);
+      tint(this.activeColor);
+      image(this.spiralImage, this.x, this.y, this.spiralWidth * this.spiralScale, this.spiralHeight * this.spiralScale);
       pop();
     }
   }
@@ -74,10 +83,7 @@ class Target{
     if(this.playNote){
       let d = 1;
       let velocity = 0.1;
-
-      for(let i = 0; i < this.synths.length; i++){
-        this.synths[i].noteAttack(this.notes[i], velocity, 0);
-      }
+      this.synths.noteAttack(this.note, velocity, 0);
     }
     else
     {
@@ -85,9 +91,7 @@ class Target{
       let velocity = map(d, 0, this.maxDiameter, 0.2, 0);
 
       if(d <= this.maxDiameter && this.isActive){
-        for(let i = 0; i < this.synths.length; i++){
-          this.synths[i].noteAttack(this.notes[i], velocity, 0);
-        }
+        this.synths.noteAttack(this.note, velocity, 0);
       }
       else{
         this.stopNotes();
@@ -97,9 +101,7 @@ class Target{
 
   // Stops notes
   stopNotes(){
-    for(let i = 0; i < this.synths.length; i++){
-      this.synths[i].noteRelease(this.notes[i]);
-    }
+    this.synths.noteRelease(this.note);
   }
 
   // Plays sound effect

@@ -17,8 +17,10 @@ Again, anchor the new vine to a circle. Repeat to grow a gnarly tree.
 
 "use strict";
 
-let bgColor = "#eef1ef";
-let groundColor = "#BA5624"
+let rnds = [0, 1, 2, 3, 4, 5, 6];
+
+let bgColor;
+let groundColor;
 
 let groundHeight = 50;
 
@@ -32,9 +34,9 @@ let soundEffect;
 let targets = [];
 let playingTargets = [];
 let numTargets = 10; // even number, max 10 for testing
-let targetDiameter = 50;
-let targetActiveColor = "#fff4d6";
-let targetInactiveColor = "#5e6572";
+let targetDiameter = 60;
+let targetActiveColors;
+let targetInactiveColor;
 let playTargetNotes = false;
 
 let notes1 = ["A4", "C4", "E4"]; // to all be played at once
@@ -44,18 +46,19 @@ let notes4 = ["D4", "F4", "A4"]; // to all be played at once
 let notes5 = ["E4", "G4", "B4"]; // to all be played at once
 let notes = [notes1, notes2, notes3, notes4, notes5];
 
-let noteA = ["A4"];
-let noteB = ["B4"];
-let noteC = ["C4"];
-let noteD = ["D4"];
-let noteE = ["E4"];
-let noteF = ["F4"];
-let noteG = ["G4"];
+let noteA = "A4";
+let noteB = "B4";
+let noteC = "C4";
+let noteD = "D4";
+let noteE = "E4";
+let noteF = "F4";
+let noteG = "G4";
 let singleNotes = [noteA, noteB, noteC, noteD, noteE, noteF, noteG];
 let maxNotes = 3;
 
 let vines = [];
 let activeVine;
+let vineColor;
 
 /**
 Description of preload
@@ -64,6 +67,21 @@ function preload() {
   bgMusic = loadSound("assets/sounds/Crowander - Underwater.mp3");
   soundEffect = loadSound("assets/sounds/whoosh.wav");
   spiralImage = loadImage("assets/images/spiral.png")
+
+  bgColor = color(36, 36, 36);
+  groundColor = color(104, 81, 85);
+
+  targetActiveColors = [
+    color(206, 66, 87), //red
+    color(249, 160, 108), //orange
+    color(244, 185, 66), //yellow
+    color(96, 147, 93), //green
+    color(0, 148, 198), //blue
+    color(202, 177, 189), //purple
+    color(205, 83, 59)]; // dark orange
+
+    targetInactiveColor = color(221, 221, 221);
+
 }
 
 
@@ -71,55 +89,91 @@ function preload() {
 Description of setup
 */
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(800, 600);
 
   // create initial target which hosts notes and sound effects
   //Target constructor(x, y, maxDiameter, activeColor, inactiveColor, notes, soundEffect);
+  let index = 0;
   append(targets, new Target(
     width / 2,
-    height  - (groundHeight + targetDiameter / 8 + 1),
+    height  - (groundHeight + targetDiameter / 8 + 10),
     targetDiameter,
-    targetActiveColor,
-    targetInactiveColor,
-    random(singleNotes),
+    targetActiveColors[index],
+    targetActiveColors[index],
+    singleNotes[index],
     soundEffect,
     spiralImage
   ));
 
-  for(let i = 0; i < numTargets / 2; i++){
+  for(let i = 0; i < 2; i++){
+    index += 1;
+    if(index > 6) index = 0;
+
     append(targets, new Target(
-      width / 3 * 1,
-      height  - (groundHeight + targetDiameter / 8 + 100 + 100 * i),
+      width / 3 * (i + 1),
+      height  - (groundHeight + targetDiameter / 8 + 100),
       targetDiameter,
-      targetActiveColor,
+      targetActiveColors[index],
       targetInactiveColor,
-      random(singleNotes),
+      singleNotes[index],
       soundEffect,
       spiralImage
     ));
   }
 
-  for(let i = 0; i < numTargets / 2; i++){
+  for(let i = 0; i < 3; i++){
+    index += 1;
+    if(index > 6) index = 0;
+
     append(targets, new Target(
-      width / 3 * 2,
-      height  - (groundHeight + targetDiameter / 8 + 100 + 100 * i),
+      width / 4 * (i + 1),
+      height  - (groundHeight + targetDiameter / 8 + 200),
       targetDiameter,
-      targetActiveColor,
+      targetActiveColors[index],
       targetInactiveColor,
-      random(singleNotes),
+      singleNotes[index],
       soundEffect,
       spiralImage
     ));
   }
 
+  for(let i = 0; i < 4; i++){
+    index += 1;
+    if(index > 6) index = 0;
 
+    append(targets, new Target(
+      width / 5 * (i + 1),
+      height  - (groundHeight + targetDiameter / 8 + 300),
+      targetDiameter,
+      targetActiveColors[index],
+      targetInactiveColor,
+      singleNotes[index],
+      soundEffect,
+      spiralImage
+    ));
+  }
 
+  for(let i = 0; i < 5; i++){
+    index += 1;
+    if(index > 6) index = 0;
+
+    append(targets, new Target(
+      width / 6 * (i + 1),
+      height  - (groundHeight + targetDiameter / 8 + 400),
+      targetDiameter,
+      targetActiveColors[index],
+      targetInactiveColor,
+      singleNotes[index],
+      soundEffect,
+      spiralImage
+    ));
+  }
 
   // create buttons for toggling music and sound - more for my own sanity
-  var buttonMusic = createButton("Toggle Music");
+  var buttonMusic = createButton("Toggle Background Music");
   buttonMusic.mousePressed(toggleMusic);
 
-  var buttonSound = createButton("Toggle Sound");
+  var buttonSound = createButton("Toggle Music Notes");
   buttonSound.mousePressed(toggleSound);
 
   userStartAudio();
@@ -131,7 +185,6 @@ Description of draw()
 */
 function draw() {
   background(bgColor);
-  displayGround();
 
   // Display Objects
   for(let i = targets.length - 1; i >= 0; i--){
@@ -155,6 +208,8 @@ function draw() {
       targets[i].stopNotes();
     }
   }
+
+  displayGround();
 }
 
 
@@ -168,7 +223,7 @@ function mousePressed(){
     // if the mouse is over the active base [0] target then grow starting vine
     let dBase = dist(mouseX, mouseY, targets[0].x, targets[0].y);
     if(targets[0].isActive && dBase < targets[0].diameter / 2){
-      activeVine = new Vine(targets[0].x, targets[0].y, 10, 26);
+      activeVine = new Vine(targets[0].x, targets[0].y, 10, 26, vineColor);
       append(vines, activeVine);
       targets[0].isActive = false;
       addPlayNotes(targets[0]);
@@ -180,7 +235,7 @@ function mousePressed(){
         for(let j = 0; j < vines[i].x.length; j++){
           let dVine = dist(mouseX, mouseY, vines[i].x[j], vines[i].y[j]);
           if(dVine < 5){
-            activeVine = new Vine(vines[i].x[j], vines[i].y[j], 10, 26);
+            activeVine = new Vine(vines[i].x[j], vines[i].y[j], 10, 26, vineColor);
             append(vines, activeVine);
             break;
           }
@@ -226,7 +281,18 @@ function displayGround(){
   noStroke();
   fill(groundColor);
   rectMode(CENTER);
-  rect(width/2, height - groundHeight / 2, width, groundHeight);
+  rect(width / 2, height - groundHeight / 2, width, groundHeight);
+
+  fill(bgColor);
+  textSize(32);
+  textAlign(CENTER);
+  let words = "";
+  for(let i = 0; i < playingTargets.length; i++){
+    words += playingTargets[i].note.toString().charAt(0) + " ";
+  }
+
+  text(words, width / 2, height - groundHeight / 2 + 10);
+
   pop();
 }
 
@@ -245,7 +311,6 @@ function addPlayNotes(newPlayer){
     playingTargets[playingTargets.length - 1] = newPlayer;
   }
 }
-
 
 /**
 Toggles the music on and off
