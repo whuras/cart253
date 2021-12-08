@@ -12,4 +12,4 @@ Experiments
 
 Projects
 1. https://whuras.github.io/cart253/projects/project1
-2.
+2. https://whuras.github.io/cart253/projects/project2/final/
